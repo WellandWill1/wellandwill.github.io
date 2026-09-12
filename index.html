@@ -62,51 +62,6 @@
             text-transform: uppercase;
         }
 
-        /* Video Grid Styling */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background-color: var(--card-color);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-primary);
-            box-shadow: 0 5px 15px rgba(102, 252, 241, 0.1);
-        }
-
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        .card-content {
-            padding: 20px;
-        }
-
-        .card-content h3 {
-            margin: 0 0 10px 0;
-            color: var(--text-light);
-        }
-
         /* Social Lists */
         .link-list {
             list-style: none;
@@ -153,44 +108,17 @@
         <!-- About Section -->
         <section>
             <h2>About Me</h2>
-            <p>Welcome to the central hub! I create dynamic gaming content, let's plays, and tutorials over on YouTube. Make sure to check out my latest videos below and join the community on Discord!</p>
-        </section>
-
-        <!-- Video Showcase Section -->
-        <section>
-            <h2>Featured Videos</h2>
-            <div class="grid">
-                <!-- Video 1 -->
-                <div class="card">
-                    <div class="video-container">
-                        <iframe src="https://youtube.com" allowfullscreen></iframe>
-                    </div>
-                    <div class="card-content">
-                        <h3>My Best Gameplay Highlights</h3>
-                        <p>Epic moments, insane clutches, and funny fails from this week's streams.</p>
-                    </div>
-                </div>
-                <!-- Video 2 -->
-                <div class="card">
-                    <div class="video-container">
-                        <iframe src="https://youtube.com" allowfullscreen></iframe>
-                    </div>
-                    <div class="card-content">
-                        <h3>Savage Content & Guides</h3>
-                        <p>A full breakdown of my newest gameplay videos, technical designs, and bot strategies.</p>
-                    </div>
-                </div>
-            </div>
+            <p>Welcome to the central hub! I create dynamic gaming content, let's plays, and tutorials over on YouTube. Make sure to check out my latest content updates and join the community across my social platforms below!</p>
         </section>
 
         <!-- Social Media Section -->
         <section>
             <h2>Connect With Me</h2>
             <div class="link-list">
-                <a href="https://youtube.com/@TheRealWellandWill" target="_blank">YouTube</a>
-                <a href="https://discord.gg/RSn5SyvR9r" target="_blank">Discord Server</a>
-                 <a href="https://x.com/wellandwillmgmt" target="_blank">Twitter / X</a>
-                <a href="https://github.com/wellandwill1" target="_blank">GitHub Profile</a>
+                <a href="https://youtube.com" target="_blank">YouTube</a>
+                <a href="https://discord.gg" target="_blank">Discord Server</a>
+                <a href="https://x.com" target="_blank">Twitter / X</a>
+                <a href="https://github.com" target="_blank">GitHub Profile</a>
             </div>
         </section>
 
