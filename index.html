@@ -60,20 +60,25 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
         section {
-            margin-bottom: 60px;
+            margin-bottom: 50px;
+            background-color: rgba(31, 40, 51, 0.3);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 154, 60, 0.1);
         }
 
         h2 {
             color: var(--text-light);
             border-left: 4px solid var(--accent-primary);
             padding-left: 15px;
-            margin-bottom: 30px;
+            margin-top: 0;
+            margin-bottom: 20px;
             text-transform: uppercase;
         }
 
@@ -81,6 +86,7 @@
         .link-list {
             list-style: none;
             padding: 0;
+            margin: 0;
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
@@ -104,6 +110,8 @@
             width: 20px;
             height: 20px;
             fill: currentColor;
+            display: inline-block;
+            flex-shrink: 0;
         }
 
         .link-list a:hover {
@@ -113,7 +121,7 @@
             box-shadow: 0 0 10px rgba(255, 201, 60, 0.4);
         }
 
-        /* 📊 DISCORD COUNTER BOX STYLING */
+        /* 📊 THE FIX: ACCURATELY ALIGNED BLOCK BOX */
         .discord-status-box {
             display: inline-flex;
             align-items: center;
@@ -133,6 +141,7 @@
             font-weight: bold;
             font-size: 1rem;
             color: var(--text-light);
+            white-space: nowrap; /* Forces text to sit on one clean horizontal line */
         }
 
         .dot {
@@ -140,22 +149,22 @@
             height: 12px;
             border-radius: 50%;
             display: inline-block;
+            flex-shrink: 0;
         }
 
-        /* 🟢 GLOWING & FLASHING GREEN DOT (ONLINE) */
+        /* 🟢 CRISP NEON FLASHING STATUS INDICATOR */
         .dot.online {
-            background-color: #23a55a; /* Discord Green */
+            background-color: #23a55a; 
             box-shadow: 0 0 8px #23a55a, 0 0 15px #23a55a;
             animation: pulse-glow 1.8s infinite ease-in-out;
         }
 
-        /* 🟡 GLOWING TOTAL MEMBERS DOT */
+        /* 🟡 SHINY MEMBER DOT */
         .dot.members {
             background-color: var(--accent-primary);
             box-shadow: 0 0 8px var(--accent-primary);
         }
 
-        /* ✨ GREEN FLASHING KEYFRAME LOGIC */
         @keyframes pulse-glow {
             0% {
                 transform: scale(1);
@@ -185,7 +194,6 @@
 <body>
 
     <header>
-        <!-- Grabs the uploaded cat photo from the folder -->
         <img src="avatar.png" alt="WellandWill Mascot" class="profile-avatar">
         <h1>WellandWill</h1>
         <p>YouTuber // Content Creator // Gamer</p>
@@ -219,7 +227,7 @@
                 </a>
             </div>
 
-            <!-- Custom Clean API counter box (Bypasses iframe security locks) -->
+            <!-- Cleared layout items -->
             <div class="discord-status-box">
                 <div class="status-item">
                     <span class="dot online"></span>
@@ -239,6 +247,7 @@
 
     <script>
         async function fetchDiscordStats() {
+            // Synced directly to your confirmed master Server ID
             const serverId = "1545933461867470898"; 
             try {
                 const response = await fetch(`https://discord.com{serverId}/widget.json`);
@@ -246,16 +255,14 @@
                 
                 const data = await response.json();
                 
-                // Set live tracker values dynamically
                 document.getElementById('discord-online').innerText = data.presence_count;
                 document.getElementById('discord-total').innerText = data.members ? data.members.length : "Active";
             } catch (error) {
                 console.error("Error loading Discord status:", error);
-                document.getElementById('discord-online').innerText = "●";
-                document.getElementById('discord-total').innerText = "Check Server";
+                document.getElementById('discord-online').innerText = "0";
+                document.getElementById('discord-total').innerText = "Active";
             }
         }
-        // Fire data fetch on mount
         fetchDiscordStats();
     </script>
 </body>
