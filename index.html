@@ -113,31 +113,46 @@
             box-shadow: 0 0 10px rgba(255, 201, 60, 0.4);
         }
 
-        /* 🟢 GLOWING & FLASHING LIVE NOTIFICATION BAR */
-        .live-status-bar {
+        /* 📊 DISCORD COUNTER BOX STYLING */
+        .discord-status-box {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 25px;
             background-color: var(--card-color);
-            padding: 10px 20px;
-            border-radius: 6px 6px 0 0;
+            padding: 15px 25px;
+            border-radius: 8px;
             border: 1px solid var(--accent-secondary);
-            border-bottom: none;
             margin-top: 25px;
-            font-weight: bold;
-            color: var(--text-light);
-            font-size: 0.95rem;
-            max-width: 310px;
+            box-shadow: 0 0 15px rgba(255, 154, 60, 0.15);
         }
 
-        .flashing-green-dot {
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .dot {
             width: 12px;
             height: 12px;
-            background-color: #23a55a; /* Discord Green */
             border-radius: 50%;
             display: inline-block;
+        }
+
+        /* 🟢 GLOWING & FLASHING GREEN DOT (ONLINE) */
+        .dot.online {
+            background-color: #23a55a; /* Discord Green */
             box-shadow: 0 0 8px #23a55a, 0 0 15px #23a55a;
             animation: pulse-glow 1.8s infinite ease-in-out;
+        }
+
+        /* 🟡 GLOWING TOTAL MEMBERS DOT */
+        .dot.members {
+            background-color: var(--accent-primary);
+            box-shadow: 0 0 8px var(--accent-primary);
         }
 
         /* ✨ GREEN FLASHING KEYFRAME LOGIC */
@@ -157,20 +172,6 @@
                 opacity: 1;
                 box-shadow: 0 0 6px #23a55a, 0 0 12px #23a55a;
             }
-        }
-
-        /* 📊 DISCORD IFRAME WIDGET CONTAINER STYLING */
-        .discord-widget-container {
-            max-width: 350px;
-            border-radius: 0 8px 8px 8px;
-            overflow: hidden;
-            border: 1px solid var(--accent-secondary);
-            box-shadow: 0 0 15px rgba(255, 154, 60, 0.1);
-        }
-
-        .discord-widget-container iframe {
-            display: block;
-            width: 100%;
         }
 
         footer {
@@ -200,7 +201,7 @@
         
         <section>
             <h2>About My Website</h2>
-            <p>Welcome to my official website! Make sure to check out my latest content updates and join the community across my social platforms below! And maybe drop a cheeky sub while you are there. Have a good day and thanks for visiting my website!</p>
+            <p>Welcome to WellandWill's official website! I create gaming content on YouTube. Make sure to check out my latest content updates and join the community across my social platforms below! And maybe drop a cheeky sub while you are there. Have a good day and thanks for visiting my website!</p>
         </section>
 
         <!-- Social Media Section -->
@@ -218,15 +219,16 @@
                 </a>
             </div>
 
-            <!-- Custom Flashing Notification Tab -->
-            <div class="live-status-bar">
-                <span class="flashing-green-dot"></span>
-                <span>LIVE SERVER CHANNELS</span>
-            </div>
-
-            <!-- Premade Discord Embed Widget -->
-            <div class="discord-widget-container">
-                <iframe src="https://discord.com" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+            <!-- Custom Clean API counter box (Bypasses iframe security locks) -->
+            <div class="discord-status-box">
+                <div class="status-item">
+                    <span class="dot online"></span>
+                    <span id="discord-online">Loading...</span> Online
+                </div>
+                <div class="status-item">
+                    <span class="dot members"></span>
+                    <span id="discord-total">Loading...</span> Members
+                </div>
             </div>
         </section>
     </div>
@@ -234,5 +236,27 @@
     <footer>
         <p>&copy; 2026 WellandWill. All rights reserved.</p>
     </footer>
+
+    <script>
+        async function fetchDiscordStats() {
+            const serverId = "1545933461867470898"; 
+            try {
+                const response = await fetch(`https://discord.com{serverId}/widget.json`);
+                if (!response.ok) throw new Error('Widget disabled');
+                
+                const data = await response.json();
+                
+                // Set live tracker values dynamically
+                document.getElementById('discord-online').innerText = data.presence_count;
+                document.getElementById('discord-total').innerText = data.members ? data.members.length : "Active";
+            } catch (error) {
+                console.error("Error loading Discord status:", error);
+                document.getElementById('discord-online').innerText = "●";
+                document.getElementById('discord-total').innerText = "Check Server";
+            }
+        }
+        // Fire data fetch on mount
+        fetchDiscordStats();
+    </script>
 </body>
 </html>
