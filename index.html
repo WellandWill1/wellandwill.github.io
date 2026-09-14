@@ -31,7 +31,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px;
-            flex: 1 0 auto; /* Keeps footer pinned to the bottom */
+            flex: 1 0 auto; /* Pushes footer to the bottom */
         }
         header {
             text-align: center;
@@ -227,6 +227,7 @@
     </header>
 
     <div class="container">
+        <!-- About Section -->
         <section>
            <h2>About WellandWill</h2>
            <p>Hey I'm WellandWill (or Will!) and I am a content creator from the United Kingdom. I love Rocket League, Fortnite, and Minecraft!</p>
@@ -237,6 +238,13 @@
             <p>Welcome to WellandWill's official website! I create gaming content on YouTube. Make sure to check out my latest content updates and join the community across my social platforms below! And maybe drop a cheeky sub while you are there. Have a good day and thanks for visiting my website!</p>
         </section>
 
+        <!-- ✉️ RE-POSITIONED CONTACT SECTION -->
+        <section>
+            <h2>Contact Me</h2>
+            <p>Have a question, a business inquiry, or just want to chat? Drop me a direct email at <a href="mailto:contact@wellandwill.co.uk" style="color: var(--accent-primary); text-decoration: none; font-weight: bold;">contact@wellandwill.co.uk</a>.</p>
+        </section>
+
+        <!-- Social Connections Section -->
         <section>
             <h2>Connect With Me</h2>
             <div class="link-list">
@@ -261,7 +269,7 @@
             </div>
         </section>
 
-        <!-- 🎬 LIVE PROGRESS TRACKER BLOCK -->
+        <!-- Live Subscriber Milestone Progress Tracker -->
         <section>
             <h2>Road to 1,000 Subs</h2>
             <div class="yt-goal-card">
@@ -285,15 +293,9 @@
                 <div class="progress-text-percent" id="goal-percent">0% Complete</div>
             </div>
         </section>
-
-        <!-- ✉️ RE-SECURED CONTACT SECTION -->
-        <section>
-            <h2>Contact Me</h2>
-            <p>Have a question, a business inquiry, or just want to chat? Drop me a direct email at <a href="mailto:contact@wellandwill.co.uk" style="color: var(--accent-primary); text-decoration: none; font-weight: bold;">contact@wellandwill.co.uk</a>.</p>
-        </section>
     </div>
 
-    <!-- 🌟 PINNED FOOTER BLOCK -->
+    <!-- Pinned Footer Frame Component -->
     <footer>
         <p>&copy; 2026 WellandWill. All rights reserved.</p>
     </footer>
@@ -323,7 +325,7 @@
                     const html = wrapper.contents;
                     const match = html.match(/"subscriberCountText":\s*\{\s*"simpleText":\s*"([^"]+)"/);
                     if (match && match) {
-                        const parsed = parseInt(match[1].replace(/[^0-9]/g, ''));
+                        const parsed = parseInt(match.replace(/[^0-9]/g, ''));
                         if (!isNaN(parsed) && parsed > 0) subCount = parsed;
                     }
                 }
