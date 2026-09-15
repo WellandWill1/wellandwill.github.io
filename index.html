@@ -31,7 +31,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px;
-            flex: 1 0 auto; /* Pushes footer to absolute bottom */
+            flex: 1 0 auto; /* Keeps footer pinned to the bottom */
         }
         header {
             text-align: center;
@@ -251,7 +251,8 @@
 
     <script>
         async function fetchLiveStats() {
-            const ytChannelId = "UC402V2Cun4ZpZJz0_8XmXdQ"; 
+            // YOUR EXACT VERIFIED YOUTUBE CHANNEL ID STRING
+            const ytChannelId = "UCPt_BP0UE9AACN8YiAVdO4Q"; 
             const targetGoal = 1000;
             
             try {
