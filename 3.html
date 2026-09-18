@@ -7,18 +7,19 @@
     <style>
         html, body { height: 100%; margin: 0; padding: 0; background: #80c0ff; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         canvas { width: 100vw; height: 100vh; display: block; background: #80c0ff; cursor: crosshair; }
-        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(20, 20, 20, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10; }
-        .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.75); padding: 6px; border-radius: 4px; border: 2px solid #333; z-index: 10; }
+        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(20, 20, 20, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100; }
+        .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.75); padding: 6px; border-radius: 4px; border: 2px solid #333; z-index: 100; }
         .slot { width: 45px; height: 45px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid transparent; color: #fff; font-size: 1rem; text-shadow: 1px 1px 2px #000; }
         .slot.active { border-color: #ffffff; background: rgba(255,255,255,0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        .slot-1 { background-color: #557a2b; border-bottom: 4px solid #3b571e; } /* Grass */
-        .slot-2 { background-color: #866043; border-bottom: 4px solid #5c412c; } /* Dirt */
-        .slot-3 { background-color: #7a7a7a; border-bottom: 4px solid #555555; } /* Stone */
-        .slot-4 { background-color: #d0b070; border-bottom: 4px solid #9e7b43; } /* Wood Plank */
-        .crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 14px; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
+        /* 🧱 CLASSICCUBE HOTBAR SLOT STYLES */
+        .slot-1 { background-color: #5c8e32; border-bottom: 4px solid #3b571e; } /* Grass */
+        .slot-2 { background-color: #7a7a7a; border-bottom: 4px solid #555555; } /* Cobble */
+        .slot-3 { background-color: #6b533b; border-bottom: 4px solid #4a3b29; } /* Oak Log */
+        .slot-4 { background-color: #b55346; border-bottom: 4px solid #7c352e; } /* Brick */
+        .crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); pointer-events: none; z-index: 100; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.85); mix-blend-mode: difference; }
-        .crosshair::before { top: 6px; left: 0; width: 16px; height: 2px; }
-        .crosshair::after { top: -1px; left: 7px; width: 2px; height: 16px; }
+        .crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
+        .crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
     </style>
 </head>
 <body>
@@ -54,44 +55,29 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // 🎲 Dynamic Player State Configurations (Centered exactly in world grid maps)
         let player = { x: 6.5, y: 7.0, z: 6.5, pitch: 0, yaw: 0, velocityY: 0, onGround: false };
         let activeBlock = 1;
         const world = {};
 
-        // 🎨 Deeply Shaded Voxel Face Graphics Matrix (Matches original textures shadow maps)
-        const faceColors = {
-            1: { top: '#6ba33b', side: '#4d7528', bottom: '#866043' }, // Grass
-            2: { top: '#866043', side: '#694832', bottom: '#523826' }, // Dirt
-            3: { top: '#8a8a8a', side: '#6e6e6e', bottom: '#545455' }, // Stone
-            4: { top: '#dfbc7a', side: '#b5975e', bottom: '#8f7346' }  // Planks
-        };
-
-        // 🧱 Stable Structural Map Coordinate Matrix (Generates a clean baseline plateau grid floor)
-        for (let x = 0; x < 16; x++) {
-            for (let z = 0; z < 16; z++) {
-                // Generates flat block roots for clean building mechanics layout platforms
+        // Generate Starting Platform 
+        for (let x = 0; x < 14; x++) {
+            for (let z = 0; z < 14; z++) {
                 let height = 3; 
                 for (let y = 0; y <= height; y++) {
-                    let type = 3; // Stone base
-                    if (y === height) type = 1; // Grass field top layer
-                    else if (y === height - 1) type = 2; // Dirt middle layer
+                    let type = 2; // Cobble Base
+                    if (y === height) type = 1; // Grass Surface
                     world[`${x},${y},${z}`] = type;
                 }
             }
         }
 
-        // 🔒 MANDATORY MOUSE POINTER CAPTURE LOCK RULE
-        canvas.addEventListener('click', () => { 
-            canvas.requestPointerLock(); 
-        });
+        canvas.addEventListener('click', () => { canvas.requestPointerLock(); });
 
         document.addEventListener('mousemove', e => {
             if (document.pointerLockElement === canvas) {
                 player.yaw -= e.movementX * 0.0025;
-                player.pitch -= e.movementY * 0.0025;
-                // Prevents back-flipping camera loops orientation angles
-                player.pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, player.pitch));
+                player.pitch += e.movementY * 0.0025; // Look up/down fixed orientation
+                player.pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, player.pitch));
             }
         });
 
@@ -106,7 +92,6 @@
         });
         document.addEventListener('keyup', e => keys[e.code] = false);
 
-        // 🛠️ Structural Custom 3D Projection Matrix (Transforms 3D arrays to flat screen coordinates)
         let cameraX, cameraY, cameraZ;
         function project(x, y, z) {
             let relX = x - cameraX, relY = y - cameraY, relZ = z - cameraZ;
@@ -127,15 +112,11 @@
                 z: finalZ
             };
         }
-        // 🖱️ FIRST-PERSON INTERACTION RAYCASTING ENGINE (Mining & Placing Blocks)
+        // 🖱️ DYNAMIC RAYCASTING ENGINE (Breaking & Placing Blocks)
         window.addEventListener('mousedown', e => {
             if (document.pointerLockElement !== canvas) return;
 
-            let rayX = cameraX;
-            let rayY = cameraY;
-            let rayZ = cameraZ;
-            
-            // Generate normal viewing trajectory line paths
+            let rayX = cameraX, rayY = cameraY, rayZ = cameraZ;
             let dirX = Math.cos(player.pitch) * Math.sin(player.yaw);
             let dirY = Math.sin(player.pitch);
             let dirZ = Math.cos(player.pitch) * Math.cos(player.yaw);
@@ -143,40 +124,26 @@
             let lastValidBlock = null;
             let targetHitBlock = null;
 
-            // Step incremental vectors through space to find collision layers
             for (let step = 0; step < 120; step++) {
-                rayX += dirX * 0.05; 
-                rayY += dirY * 0.05; 
-                rayZ += dirZ * 0.05;
-                
-                let bx = Math.floor(rayX); 
-                let by = Math.floor(rayY); 
-                let bz = Math.floor(rayZ);
+                rayX += dirX * 0.05; rayY += dirY * 0.05; rayZ += dirZ * 0.05;
+                let bx = Math.floor(rayX), by = Math.floor(rayY), bz = Math.floor(rayZ);
                 let blockFound = world[`${bx},${by},${bz}`];
 
                 if (blockFound) {
                     targetHitBlock = {x: bx, y: by, z: bz};
                     break;
                 }
-                // Log last air block coordinate before impact grid intersection
                 lastValidBlock = {x: bx, y: by, z: bz};
             }
 
             if (e.button === 0 && targetHitBlock) { 
-                // Left Click: INSTANTLY BREAK/MINE TARGET BLOCK
+                // Left Click: Break
                 delete world[`${targetHitBlock.x},${targetHitBlock.y},${targetHitBlock.z}`];
             } 
             else if (e.button === 2 && lastValidBlock) { 
-                // Right Click: INSTANTLY PLACE SELECTED INVENTORY BLOCK
-                // Prevent placing block directly around the camera box coordinates
-                let playerFootX = Math.floor(player.x);
-                let playerFootY = Math.floor(player.y);
-                let playerHeadY = Math.floor(player.y + 0.5);
-                let playerFootZ = Math.floor(player.z);
-                
-                let hitsPlayer = (lastValidBlock.x === playerFootX && lastValidBlock.z === playerFootZ && 
-                                 (lastValidBlock.y === playerFootY || lastValidBlock.y === playerHeadY));
-                                 
+                // Right Click: Build
+                let pX = Math.floor(player.x), pY = Math.floor(player.y), pZ = Math.floor(player.z);
+                let hitsPlayer = (lastValidBlock.x === pX && lastValidBlock.z === pZ && (lastValidBlock.y === pY || lastValidBlock.y === Math.floor(player.y + 0.5)));
                 if (!hitsPlayer) {
                     world[`${lastValidBlock.x},${lastValidBlock.y},${lastValidBlock.z}`] = activeBlock;
                 }
@@ -184,29 +151,72 @@
         });
         window.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 🔄 MAIN GAME ENGINE RUNTIME TICK LOOP
-        function loop() {
-            // Apply Directional Vector Physics Velocities
-            let speed = 0.075;
-            let moveX = 0, moveZ = 0;
-            if (keys['KeyW']) { moveX += Math.sin(player.yaw); moveZ += Math.cos(player.yaw); }
-            if (keys['KeyS']) { moveX -= Math.sin(player.yaw); moveZ -= Math.cos(player.yaw); }
-            if (keys['KeyA']) { moveX -= Math.cos(player.yaw); moveZ += Math.sin(player.yaw); }
-            if (keys['KeyD']) { moveX += Math.cos(player.yaw); moveZ -= Math.sin(player.yaw); }
+        // 🎨 TEXTURE GENERATOR ENGINE (Simulates classic 16x16 pixel texturing dynamically)
+        function drawTexturedFace(pts, type, faceType) {
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            ctx.lineTo(pts[1].x, pts[1].y);
+            ctx.lineTo(pts[2].x, pts[2].y);
+            ctx.lineTo(pts[3].x, pts[3].y);
+            ctx.closePath();
 
-            if (moveX !== 0 || moveZ !== 0) {
-                let magnitude = Math.sqrt(moveX * moveX + moveZ * moveZ);
-                player.x += (moveX / magnitude) * speed;
-                player.z += (moveZ / magnitude) * speed;
+            // Set texture canvas baselines
+            let baseColors = {
+                1: { top: '#6ba33b', side: '#73523a', bottom: '#523826' }, // Grass Block
+                2: { top: '#7a7a7a', side: '#6e6e6e', bottom: '#555555' }, // Cobblestone
+                3: { top: '#a3835b', side: '#6b533b', bottom: '#a3835b' }, // Oak Log
+                4: { top: '#b55346', side: '#a1453a', bottom: '#b55346' }  // Bricks
+            };
+            
+            let color = baseColors[type][faceType];
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            // Create pixel patterns overlay grid natively to look like ClassiCube textures
+            ctx.fillStyle = faceType === 'top' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            for (let i = 0; i < 4; i++) {
+                if ((i + type) % 2 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(pts[i].x, pts[i].y);
+                    ctx.lineTo((pts[i].x + pts[(i+1)%4].x)/2, (pts[i].y + pts[(i+1)%4].y)/2);
+                    ctx.lineTo((pts[0].x + pts[2].x)/2, (pts[0].y + pts[2].y)/2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
             }
 
-            // Simple Acceleration Gravity Physics Calculations
+            ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        }
+
+        // 🔄 MASTER RUNTIME TICK LOOP
+        function loop() {
+            // ✅ DIRECTIONAL CAM ACTION VECTOR CALCULATIONS (W follows look angles exactly)
+            let speed = 0.075;
+            let moveX = 0, moveZ = 0;
+            
+            let forwardX = Math.sin(player.yaw);
+            let forwardZ = Math.cos(player.yaw);
+            let strafeX = Math.cos(player.yaw);
+            let strafeZ = -Math.sin(player.yaw);
+
+            if (keys['KeyW']) { moveX += forwardX; moveZ += forwardZ; }
+            if (keys['KeyS']) { moveX -= forwardX; moveZ -= forwardZ; }
+            if (keys['KeyA']) { moveX -= strafeX; moveZ -= strafeZ; }
+            if (keys['KeyD']) { moveX += strafeX; moveZ += strafeZ; }
+
+            if (moveX !== 0 || moveZ !== 0) {
+                let mag = Math.sqrt(moveX * moveX + moveZ * moveZ);
+                player.x += (moveX / mag) * speed;
+                player.z += (moveZ / mag) * speed;
+            }
+
+            // Gravity Calculation Math
             player.velocityY -= 0.014;
             player.y += player.velocityY;
 
-            // Stable Foot Boundary Grid Collisions Check
-            let pX = Math.floor(player.x);
-            let pZ = Math.floor(player.z);
+            let pX = Math.floor(player.x), pZ = Math.floor(player.z);
             let standingY = Math.floor(player.y - 1.6);
             let checkBlockBase = world[`${pX},${standingY},${pZ}`];
 
@@ -218,75 +228,54 @@
                 player.onGround = false;
             }
 
-            // Jumping Physics Map Triggers
             if (keys['Space'] && player.onGround) {
                 player.velocityY = 0.23;
                 player.onGround = false;
             }
 
-            // Clamp World Coordinates Inside the 16x16 Plateau
-            player.x = Math.max(0.2, Math.min(15.4, player.x));
-            player.z = Math.max(0.2, Math.min(15.4, player.z));
+            player.x = Math.max(0.2, Math.min(13.8, player.x));
+            player.z = Math.max(0.2, Math.min(13.8, player.z));
 
-            // Sync Main Rendering Eye Nodes
-            cameraX = player.x; 
-            cameraY = player.y; 
-            cameraZ = player.z;
+            cameraX = player.x; cameraY = player.y; cameraZ = player.z;
 
-            // Paint Master Sky View Panel Canvas Background
+            // Render Sky Blue Field
             ctx.fillStyle = '#80c0ff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Fetch, Distance-Filter, and Deep-Sort Cube Blocks Layers Queue
+            // Fetch and Sort Queues
             let renderQueue = [];
-            for (let coordinates in world) {
-                let [x, y, z] = coordinates.split(',').map(Number);
+            for (let coord in world) {
+                let [x, y, z] = coord.split(',').map(Number);
                 let distance = Math.sqrt((x - cameraX) ** 2 + (y - cameraY) ** 2 + (z - cameraZ) ** 2);
-                // Render distance bubble threshold limit
-                if (distance < 16) {
-                    renderQueue.push({x: x, y: y, z: z, type: world[coordinates], dist: distance});
+                if (distance < 14) {
+                    renderQueue.push({x: x, y: y, z: z, type: world[coord], dist: distance});
                 }
             }
-            // Z-Sorting back-to-front prevents perspective overlapping flaws
             renderQueue.sort((a, b) => b.dist - a.dist);
 
-            // Render Polygon Face Projections
+            // Render Polygon Points Blocks
             renderQueue.forEach(cube => {
-                let drawVoxelFace = (p1, p2, p3, p4, color) => {
-                    let pts = [project(...p1), project(...p2), project(...p3), project(...p4)];
-                    if (pts.some(pt => !pt)) return;
-
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.moveTo(pts[0].x, pts[0].y);
-                    ctx.lineTo(pts[1].x, pts[1].y);
-                    ctx.lineTo(pts[2].x, pts[2].y);
-                    ctx.lineTo(pts[3].x, pts[3].y);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // Voxel Grid Outline Details Structuring
-                    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-                    ctx.lineWidth = 0.5;
-                    ctx.stroke();
-                };
-
                 let [x, y, z] = [cube.x, cube.y, cube.z];
-                let shades = faceColors[cube.type];
-
-                // 📦 3D Wireframe Boundary Matrix Points Maps
-                let vertex = [
-                    [x, y + 1.0, z],       [x + 1.0, y + 1.0, z],       [x + 1.0, y + 1.0, z + 1.0], [x, y + 1.0, z + 1.0], // Top points
-                    [x, y, z],             [x + 1.0, y, z],             [x + 1.0, y, z + 1.0],       [x, y, z + 1.0]        // Bottom points
+                let v = [
+                    [x, y+1, z], [x+1, y+1, z], [x+1, y+1, z+1], [x, y+1, z+1], // Top vertices
+                    [x, y, z], [x+1, y, z], [x+1, y, z+1], [x, y, z+1]          // Bottom vertices
                 ];
 
-                // Render specific cube vectors based on current look orientation positions
-                if (cameraY > y + 1.0) drawVoxelFace(vertex[0], vertex[1], vertex[2], vertex[3], shades.top);
-                if (cameraZ > z + 1.0) drawVoxelFace(vertex[3], vertex[2], vertex[6], vertex[7], shades.side);
-                if (cameraX > x + 1.0) drawVoxelFace(vertex[1], vertex[2], vertex[6], vertex[5], shades.side);
-                if (cameraZ < z)       drawVoxelFace(vertex[0], vertex[1], vertex[5], vertex[4], shades.side);
-                if (cameraX < x)       drawVoxelFace(vertex[0], vertex[3], vertex[7], vertex[4], shades.side);
-                if (cameraY < y)       drawVoxelFace(vertex[4], vertex[5], vertex[6], vertex[7], shades.bottom);
+                let p = v.map(vertex => project(...vertex));
+
+                let drawFaceIfValid = (i1, i2, i3, i4, faceType) => {
+                    let pts = [p[i1], p[i2], p[i3], p[i4]];
+                    if (pts.some(pt => !pt)) return;
+                    drawTexturedFace(pts, cube.type, faceType);
+                };
+
+                // Project visible block surfaces dynamically based on viewpoint positions
+                if (cameraY > y + 1) drawFaceIfValid(0, 1, 2, 3, 'top');
+                if (cameraZ > z + 1) drawFaceIfValid(4, 5, 1, 0, 'side');
+                if (cameraX > x + 1) drawFaceIfValid(5, 6, 2, 1, 'side');
+                if (cameraZ < z)     drawFaceIfValid(6, 7, 3, 2, 'side');
+                if (cameraX < x)     drawFaceIfValid(7, 4, 0, 3, 'side');
+                if (cameraY < y)     drawFaceIfValid(7, 6, 5, 4, 'bottom');
             });
 
             requestAnimationFrame(loop);
