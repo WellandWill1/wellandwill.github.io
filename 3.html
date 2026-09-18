@@ -3,40 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Arcade Session - 3</title>
+    <title>Arcade - 3</title>
     <style>
         html, body { height: 100%; margin: 0; padding: 0; background: #0b0c10; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        #canvas { width: 100vw; height: 100vh; display: block; }
-        .stealth-load { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffc93c; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
+        canvas { width: 100vw; height: 100vh; display: block; cursor: crosshair; }
+        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(31, 40, 51, 0.85); border: 1px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.4; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 100%; transform: translate(-50%, -50%); pointer-events: none; }
+        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.7); }
+        .crosshair::before { top: 4px; left: -5px; width: 10px; height: 2px; }
+        .crosshair::after { top: -1px; left: -1px; width: 2px; height: 12px; }
     </style>
 </head>
 <body>
-    <div class="stealth-load" id="status">Loading System Core...</div>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <div class="controls-overlay">
+        <strong style="color: #ffc93c; text-transform: uppercase;">Unblocked Craft v1.0</strong><br>
+        • Move: <span style="color: #ff9a3c;">W, A, S, D</span><br>
+        • Look: <span style="color: #ff9a3c;">Move Mouse</span> (Click canvas to lock)<br>
+        • Break Block: <span style="color: #ff9a3c;">Left Click</span><br>
+        • Place Block: <span style="color: #ff9a3c;">Right Click</span><br>
+        • Switch Block: <span style="color: #ff9a3c;">1, 2, 3</span>
+    </div>
+    <div class="crosshair"></div>
+    <canvas id="renderCanvas"></canvas>
 
-    <script type='text/javascript'>
-        // Native browser environment configurations for unblocked compiling
-        var Module = {
-            preRun: [],
-            postRun: [],
-            arguments: ["ClassiCube User"],
-            print: function(text) { console.log(text); },
-            printErr: function(text) { console.error(text); },
-            canvas: (function() {
-                var canvas = document.getElementById('canvas');
-                return canvas;
-            })(),
-            setStatus: function(text) {
-                var statusElement = document.getElementById('status');
-                if (!text) {
-                    statusElement.style.display = 'none';
-                } else {
-                    statusElement.innerHTML = text;
+    <!-- Three.js 3D Rendering Library compiled over unblocked raw source CDN -->
+    <script src="https://cloudflare.com"></script>
+    <script>
+        const canvas = document.getElementById('renderCanvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x40a0ff); // Sky blue background
+        scene.fog = new THREE.FogExp2(0x40a0ff, 0.05);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+
+        // Lighting Matrix
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(20, 40, 20);
+        scene.add(directionalLight);
+
+        // Core Texture Blocks Map Layout
+        const loader = new THREE.TextureLoader();
+        const blockTypes = {
+            1: new THREE.MeshLambertMaterial({ color: 0x557a2b }), // Grass
+            2: new THREE.MeshLambertMaterial({ color: 0x866043 }), // Dirt
+            3: new THREE.MeshLambertMaterial({ color: 0x7a7a7a })  // Stone
+        };
+        let activeBlockType = 1;
+
+        // Generate Terrain Blocks Grid Array Locally
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const objects = [];
+        const worldSize = 24;
+
+        for (let x = -worldSize; x < worldSize; x++) {
+            for (let z = -worldSize; z < worldSize; z++) {
+                // Procedural generation height simulation equation
+                let height = Math.floor((Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 2) + 4;
+                for (let y = 0; y <= height; y++) {
+                    let material = blockTypes[2]; // Default dirt
+                    if (y === height) material = blockTypes[1]; // Grass top
+                    if (y < height - 2) material = blockTypes[3]; // Stone deep roots
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(x, y, z);
+                    scene.add(mesh);
+                    objects.push(mesh);
                 }
             }
-        };
+        }
+
+        // Camera Player Control Variable Configurations
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let yaw = 0, pitch = 0;
+        camera.position.set(0, 10, 0);
+
+        canvas.addEventListener('click', () => { canvas.requestPointerLock(); });
+
+        document.addEventListener('mousemove', (e) => {
+            if (document.pointerLockElement === canvas) {
+                yaw -= e.movementX * 0.002;
+                pitch -= e.movementY * 0.002;
+                pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
+
+                const am = new THREE.Euler(0, 0, 0, 'YXZ');
+                am.set(pitch, yaw, 0);
+                camera.quaternion.setFromEuler(am);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW') moveForward = true;
+            if (e.code === 'KeyS') moveBackward = true;
+            if (e.code === 'KeyA') moveLeft = true;
+            if (e.code === 'KeyD') moveRight = true;
+            if (e.key === '1') activeBlockType = 1;
+            if (e.key === '2') activeBlockType = 2;
+            if (e.key === '3') activeBlockType = 3;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyW') moveForward = false;
+            if (e.code === 'KeyS') moveBackward = false;
+            if (e.code === 'KeyA') moveLeft = false;
+            if (e.code === 'KeyD') moveRight = false;
+        });
+
+        // Break & Place Block Interactions Mechanics Array
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(0, 0);
+
+        window.addEventListener('mousedown', (e) => {
+            if (document.pointerLockElement !== canvas) return;
+            raycaster.setFromCamera(mouse, camera);
+            const intersections = raycaster.intersectObjects(objects);
+
+            if (intersections.length > 0) {
+                const intersect = intersections[0];
+                
+                if (e.button === 0) { // Left Click Break Block
+                    scene.remove(intersect.object);
+                    const index = objects.indexOf(intersect.object);
+                    if (index > -1) objects.splice(index, 1);
+                } 
+                else if (e.button === 2) { // Right Click Place Block
+                    const mesh = new THREE.Mesh(geometry, blockTypes[activeBlockType]);
+                    mesh.position.copy(intersect.object.position).add(intersect.face.normal);
+                    scene.add(mesh);
+                    objects.push(mesh);
+                }
+            }
+        });
+
+        // Smooth Rendering Movement Game Loop execution updates
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const speed = 6;
+
+            if (document.pointerLockElement === canvas) {
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                direction.y = 0;
+                direction.normalize();
+
+                const sideDirection = new THREE.Vector3();
+                sideDirection.copy(direction).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+
+                if (moveForward) camera.position.addScaledVector(direction, speed * delta);
+                if (moveBackward) camera.position.addScaledVector(direction, -speed * delta);
+                if (moveLeft) camera.position.addScaledVector(sideDirection, speed * delta);
+                if (moveRight) camera.position.addScaledVector(sideDirection, -speed * delta);
+            }
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        animate();
     </script>
-    <!-- Master open source WebGL execution bridge engine -->
-    <script async src="https://amazonaws.com"></script>
 </body>
 </html>
