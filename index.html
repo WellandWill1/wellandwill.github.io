@@ -208,11 +208,10 @@
         }
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-bottom: 5px;
         }
-        /* 🕹️ STYLED ARCADE ANCHORS CHANNELS */
         .game-link-btn {
             display: block;
             text-align: center;
@@ -225,6 +224,7 @@
             text-decoration: none;
             text-transform: uppercase;
             transition: all 0.2s ease;
+            font-size: 0.9rem;
         }
         .game-link-btn:hover {
             background-color: var(--accent-primary);
@@ -315,9 +315,11 @@
             <section style="border-color: var(--accent-primary); padding: 25px;">
                 <h2>System Core Vault</h2>
                 <div class="game-grid">
-                    <!-- 🌟 DIRECT NAVIGATION INTERCEPTS FOR FULL-SCREEN ARCADE SESSIONS -->
-                    <a href="/1" class="game-link-btn">Game Session 1 (Snake)</a>
-                    <a href="/2" class="game-link-btn">Game Session 2 (Tetris)</a>
+                    <!-- 🌟 ALL 4 DIRECT ROUTED REPO NAVIGATION LINKS FULLY WIRED -->
+                    <a href="/1" class="game-link-btn">Game 1: Snake</a>
+                    <a href="/2" class="game-link-btn">Game 2: Tetris</a>
+                    <a href="/3" class="game-link-btn">Game 3: ClassicCube</a>
+                    <a href="/4" class="game-link-btn">Game 4: Cookie Clicker</a>
                 </div>
             </section>
         </div>
@@ -352,7 +354,7 @@
             
             try {
                 const apiResponse = await fetch(`https://allorigins.win{encodeURIComponent('https://subscribercount.org' + ytChannelId)}`);
-                let subCount = 303; // Core baseline parameter
+                let subCount = 303; 
 
                 if (apiResponse.ok) {
                     const wrapper = await apiResponse.json();
