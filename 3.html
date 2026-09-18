@@ -5,29 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Arcade - 3</title>
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; background: #40a0ff; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        canvas { width: 100vw; height: 100vh; display: block; background: #40a0ff; }
-        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(31, 40, 51, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); }
-        .slot { width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid transparent; color: #fff; font-size: 0.8rem; }
-        .slot.active { border-color: #ffc93c; background: rgba(255,255,255,0.1); }
+        html, body { height: 100%; margin: 0; padding: 0; background: #80c0ff; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        canvas { width: 100vw; height: 100vh; display: block; background: #80c0ff; cursor: crosshair; }
+        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(20, 20, 20, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10; }
+        .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); z-index: 10; }
+        .slot { width: 45px; height: 45px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid transparent; color: #fff; font-size: 0.9rem; }
+        .slot.active { border-color: #ffc93c; background: rgba(255,255,255,0.15); }
         .slot-1 { background-color: #557a2b; } /* Grass */
         .slot-2 { background-color: #866043; } /* Dirt */
         .slot-3 { background-color: #7a7a7a; } /* Stone */
-        .slot-4 { background-color: #b0722a; } /* Wood */
+        .slot-4 { background-color: #d0b070; } /* Plank */
+        .crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
+        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.8); }
+        .crosshair::before { top: 6px; left: 0; width: 14px; height: 2px; }
+        .crosshair::after { top: 0; left: 6px; width: 2px; height: 14px; }
     </style>
 </head>
 <body>
 
     <div class="controls-overlay">
-        <strong style="color: #ffc93c; text-transform: uppercase;">Unblocked Craft 2D</strong><br>
-        • Move Camera: <span style="color: #ff9a3c;">A, D / Arrow Keys</span><br>
-        • Break Block: <span style="color: #ff9a3c;">Left Click</span><br>
-        • Place Block: <span style="color: #ff9a3c;">Shift + Left Click</span><br>
-        • Select Block: <span style="color: #ff9a3c;">Keys 1, 2, 3, 4</span>
+        <strong style="color: #ffc93c; text-transform: uppercase;">Unblocked Craft 3D</strong><br>
+        • Move: <span style="color: #ff9a3c;">W, A, S, D</span><br>
+        • Jump: <span style="color: #ff9a3c;">Spacebar</span><br>
+        • Look: <span style="color: #ff9a3c;">Click screen & Move Mouse</span><br>
+        • Mine Block: <span style="color: #ff9a3c;">Left Click</span><br>
+        • Build Block: <span style="color: #ff9a3c;">Right Click</span><br>
+        • Select Block: <span style="color: #ff9a3c;">1, 2, 3, 4</span>
     </div>
 
-    <!-- Hotbar Display -->
+    <div class="crosshair"></div>
     <div class="hotbar">
         <div class="slot slot-1 active" id="slot-1">1</div>
         <div class="slot slot-2" id="slot-2">2</div>
@@ -41,7 +47,6 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Setup clean responsive windows scaling
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -49,124 +54,207 @@
         window.addEventListener('resize', resize);
         resize();
 
-        const blockSize = 32;
-        let cameraX = 0;
-        let activeSlot = 1;
+        // 🎲 Player Physics States
+        let player = { x: 6, y: 9, z: 6, pitch: 0, yaw: 0, velocityY: 0, onGround: false };
+        let activeBlock = 1;
         const world = {};
 
-        // Local Block Texture Color Mapping Matrix
-        const blockColors = {
-            1: '#557a2b', // Grass
-            2: '#866043', // Dirt
-            3: '#7a7a7a', // Stone
-            4: '#b0722a'  // Wood
+        // 🎨 Block Face Color Mapping Matrix
+        const faceColors = {
+            1: { top: '#5c8e32', side: '#4d7528', bottom: '#866043' }, // Grass
+            2: { top: '#866043', side: '#73523a', bottom: '#73523a' }, // Dirt
+            3: { top: '#808080', side: '#6e6e6e', bottom: '#6e6e6e' }, // Stone
+            4: { top: '#d0b070', side: '#b89a58', bottom: '#b89a58' }  // Planks
         };
 
-        // Procedural World Terrain Generator Logic (Generates completely inside browser memory)
-        function generateChunk(chunkX) {
-            for (let x = 0; x < 20; x++) {
-                const globalX = chunkX * 20 + x;
-                if (world[globalX]) continue;
-
-                world[globalX] = {};
-                // Terrain sine wave generation mathematical layout height rules
-                const groundY = Math.floor(Math.sin(globalX * 0.1) * 3) + 12;
-
-                for (let y = 0; y < 30; y++) {
-                    if (y === groundY) world[globalX][y] = 1; // Surface Layer: Grass
-                    else if (y > groundY && y < groundY + 4) world[globalX][y] = 2; // Middle Layer: Dirt
-                    else if (y >= groundY + 4) world[globalX][y] = 3; // Deep Layer: Stone
+        // 🧱 Generate Voxel Terrain Grid Maps Locally
+        for (let x = 0; x < 14; x++) {
+            for (let z = 0; z < 14; z++) {
+                let height = Math.floor(Math.sin(x * 0.3) * Math.cos(z * 0.3) * 2) + 4;
+                for (let y = 0; y <= height; y++) {
+                    let type = 3; // Stone deep
+                    if (y === height) type = 1; // Grass top
+                    else if (y > height - 2) type = 2; // Dirt middle
+                    world[`${x},${y},${z}`] = type;
                 }
             }
         }
 
-        // Camera Pan Controller Inputs
+        canvas.addEventListener('click', () => { canvas.requestPointerLock(); });
+        document.addEventListener('mousemove', e => {
+            if (document.pointerLockElement === canvas) {
+                player.yaw -= e.movementX * 0.0025;
+                player.pitch -= e.movementY * 0.0025;
+                player.pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, player.pitch));
+            }
+        });
+
         let keys = {};
-        window.addEventListener('keydown', e => {
+        document.addEventListener('keydown', e => {
             keys[e.code] = true;
-            if (e.key === '1') selectSlot(1);
-            if (e.key === '2') selectSlot(2);
-            if (e.key === '3') selectSlot(3);
-            if (e.key === '4') selectSlot(4);
+            if (e.key >= '1' && e.key <= '4') {
+                document.getElementById(`slot-${activeBlock}`).classList.remove('active');
+                activeBlock = parseInt(e.key);
+                document.getElementById(`slot-${activeBlock}`).classList.add('active');
+            }
         });
-        window.addEventListener('keyup', e => keys[e.code] = false);
+        document.addEventListener('keyup', e => keys[e.code] = false);
 
-        function selectSlot(slot) {
-            document.getElementById(`slot-${activeSlot}`).classList.remove('active');
-            activeSlot = slot;
-            document.getElementById(`slot-${activeSlot}`).classList.add('active');
+        // 🛠️ Pure Math 3D Perspective Projection Matrix Engine
+        let cameraX, cameraY, cameraZ;
+        function project(x, y, z) {
+            let relX = x - cameraX, relY = y - cameraY, relZ = z - cameraZ;
+            let cosY = Math.cos(-player.yaw), sinY = Math.sin(-player.yaw);
+            let cosP = Math.cos(-player.pitch), sinP = Math.sin(-player.pitch);
+
+            let rotX = relX * cosY - relZ * sinY;
+            let rotZ = relX * sinY + relZ * cosY;
+            let rotY = relY * cosP - rotZ * sinP;
+            let finalZ = relY * sinP + rotZ * cosP;
+
+            if (finalZ <= 0.1) return null;
+
+            let fov = Math.min(canvas.width, canvas.height) * 0.8;
+            return {
+                x: canvas.width / 2 + (rotX / finalZ) * fov,
+                y: canvas.height / 2 - (rotY / finalZ) * fov,
+                z: finalZ
+            };
         }
-
-        // Mouse Interactivity Physics (Mining & Building grids)
+        // 🖱️ Raycasting Logic (Mining & Building Intersection Vectors)
         window.addEventListener('mousedown', e => {
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left + cameraX;
-            const clickY = e.clientY - rect.top;
+            if (document.pointerLockElement !== canvas) return;
 
-            const blockX = Math.floor(clickX / blockSize);
-            const blockY = Math.floor(clickY / blockSize);
+            let rayX = cameraX, rayY = cameraY, rayZ = cameraZ;
+            let dirX = Math.cos(player.pitch) * Math.sin(player.yaw);
+            let dirY = Math.sin(player.pitch);
+            let dirZ = Math.cos(player.pitch) * Math.cos(player.yaw);
 
-            if (!world[blockX]) world[blockX] = {};
+            let lastValid = null;
+            let hit = null;
 
-            if (e.shiftKey) {
-                // Shift + Click: Place Block
-                if (!world[blockX][blockY]) {
-                    world[blockX][blockY] = activeSlot;
+            for (let step = 0; step < 70; step++) {
+                rayX += dirX * 0.08; rayY += dirY * 0.08; rayZ += dirZ * 0.08;
+                let bx = Math.round(rayX), by = Math.round(rayY), bz = Math.round(rayZ);
+                let currentBlock = world[`${bx},${by},${bz}`];
+
+                if (currentBlock) {
+                    hit = {x: bx, y: by, z: bz};
+                    break;
                 }
-            } else {
-                // Click: Mine/Break Block
-                if (world[blockX][blockY]) {
-                    delete world[blockX][blockY];
-                }
-            }
-        });
-
-        // Principal Core Game Engine Execution Loops
-        function update() {
-            if (keys['KeyA'] || keys['ArrowLeft']) cameraX -= 5;
-            if (keys['KeyD'] || keys['ArrowRight']) cameraX += 5;
-            if (cameraX < -5000) cameraX = -5000;
-        }
-
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Sky Backdrop Gradients Elements
-            ctx.fillStyle = '#40a0ff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const startChunk = Math.floor(cameraX / (20 * blockSize)) - 1;
-            const endChunk = startChunk + Math.ceil(canvas.width / (20 * blockSize)) + 2;
-
-            for (let c = startChunk; c <= endChunk; c++) {
-                generateChunk(c);
+                lastValid = {x: bx, y: by, z: bz};
             }
 
-            const startX = Math.floor(cameraX / blockSize) - 1;
-            const endX = startX + Math.ceil(canvas.width / blockSize) + 2;
-
-            for (let x = startX; x <= endX; x++) {
-                if (!world[x]) continue;
-                for (let y = 0; y < 40; y++) {
-                    const blockType = world[x][y];
-                    if (blockType && blockColors[blockType]) {
-                        ctx.fillStyle = blockColors[blockType];
-                        ctx.fillRect(x * blockSize - cameraX, y * blockSize, blockSize, blockSize);
-                        
-                        // Clean outline borders defining the grid lines structure look
-                        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-                        ctx.strokeRect(x * blockSize - cameraX, y * blockSize, blockSize, blockSize);
+            if (hit) {
+                if (e.button === 0) { // Left Click: Break
+                    delete world[`${hit.x},${hit.y},${hit.z}`];
+                } else if (e.button === 2 && lastValid) { // Right Click: Build
+                    // Ensure you don't suffocate yourself inside your own block
+                    if (lastValid.x !== Math.floor(player.x) || lastValid.z !== Math.floor(player.z)) {
+                        world[`${lastValid.x},${lastValid.y},${lastValid.z}`] = activeBlock;
                     }
                 }
             }
-        }
+        });
+        window.addEventListener('contextmenu', e => e.preventDefault());
 
-        function gameLoop() {
-            update();
-            render();
-            requestAnimationFrame(gameLoop);
+        // 🔄 Main Game Engine Physics & Movement Calculations Loop
+        function loop() {
+            let speed = 0.07;
+            let moveX = 0, moveZ = 0;
+            if (keys['KeyW']) { moveX += Math.sin(player.yaw); moveZ += Math.cos(player.yaw); }
+            if (keys['KeyS']) { moveX -= Math.sin(player.yaw); moveZ -= Math.cos(player.yaw); }
+            if (keys['KeyA']) { moveX -= Math.cos(player.yaw); moveZ += Math.sin(player.yaw); }
+            if (keys['KeyD']) { moveX += Math.cos(player.yaw); moveZ -= Math.sin(player.yaw); }
+
+            if (moveX !== 0 || moveZ !== 0) {
+                let mag = Math.sqrt(moveX*moveX + moveZ*moveZ);
+                player.x += (moveX / mag) * speed;
+                player.z += (moveZ / mag) * speed;
+            }
+
+            // Simple Localized Gravity Engine Logic
+            player.velocityY -= 0.012;
+            player.y += player.velocityY;
+
+            let bx = Math.floor(player.x), bz = Math.floor(player.z);
+            let standingBlockY = Math.floor(player.y - 1.6);
+            let currentFootBlock = world[`${bx},${standingBlockY},${bz}`];
+
+            if (currentFootBlock) {
+                player.y = standingBlockY + 1 + 1.6;
+                player.velocityY = 0;
+                player.onGround = true;
+            } else {
+                player.onGround = false;
+            }
+
+            if (keys['Space'] && player.onGround) {
+                player.velocityY = 0.24;
+                player.onGround = false;
+            }
+
+            // Enforce world boundaries
+            player.x = Math.max(0.5, Math.min(13.5, player.x));
+            player.z = Math.max(0.5, Math.min(13.5, player.z));
+
+            cameraX = player.x; cameraY = player.y; cameraZ = player.z;
+
+            // Render Backdrop Frame Sky Colors
+            ctx.fillStyle = '#80c0ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Compile Voxel Depth Sorting Layers Queue
+            let renderQueue = [];
+            for (let coord in world) {
+                let [x, y, z] = coord.split(',').map(Number);
+                let dist = Math.sqrt((x-cameraX)**2 + (y-cameraY)**2 + (z-cameraZ)**2);
+                if (dist < 12) renderQueue.push({x: x, y: y, z: z, type: world[coord], dist: dist});
+            }
+            renderQueue.sort((a, b) => b.dist - a.dist);
+
+            // Draw Voxel Polygon Faces (Top, Side, and Face Lines)
+            renderQueue.forEach(cube => {
+                let drawFace = (p1, p2, p3, p4, color) => {
+                    let pts = [project(...p1), project(...p2), project(...p3), project(...p4)];
+                    if (pts.some(pt => !pt)) return;
+
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    ctx.lineTo(pts[1].x, pts[1].y);
+                    ctx.lineTo(pts[2].x, pts[2].y);
+                    ctx.lineTo(pts[3].x, pts[3].y);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                };
+
+                let c = cube.type;
+                let colors = faceColors[c];
+                let [x, y, z] = [cube.x, cube.y, cube.z];
+
+                // 📦 3D Wireframe Point Mapping Matrix
+                let p = [
+                    [x-0.5, y+0.5, z-0.5], [x+0.5, y+0.5, z-0.5], [x+0.5, y+0.5, z+0.5], [x-0.5, y+0.5, z+0.5], // Top corners
+                    [x-0.5, y-0.5, z-0.5], [x+0.5, y-0.5, z-0.5], [x+0.5, y-0.5, z+0.5], [x-0.5, y-0.5, z+0.5]  // Bottom corners
+                ];
+
+                // Conditionally render top vs sides depending on camera positions layout
+                if (cameraY > y) drawFace(p[0], p[1], p[2], p[3], colors.top);
+                if (cameraZ > z) drawFace(p[3], p[2], p[6], p[7], colors.side);
+                if (cameraX > x) drawFace(p[1], p[2], p[6], p[5], colors.side);
+                if (cameraZ < z) drawFace(p[0], p[1], p[5], p[4], colors.side);
+                if (cameraX < x) drawFace(p[0], p[3], p[7], p[4], colors.side);
+                if (cameraY < y) drawFace(p[4], p[5], p[6], p[7], colors.bottom);
+            });
+
+            requestAnimationFrame(loop);
         }
-        gameLoop();
+        loop();
     </script>
 </body>
 </html>
