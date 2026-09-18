@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Engine - 4</title>
+    <style>
+        html, body { height: 100%; margin: 0; background: #0b0c10; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; overflow: hidden; user-select: none; }
+        .cookie-wrapper { text-align: center; }
+        .counter { font-size: 2.5rem; font-weight: bold; color: #ffc93c; margin-bottom: 20px; text-shadow: 0 0 10px rgba(255,201,60,0.3); }
+        .cookie-btn { width: 200px; height: 200px; background: radial-gradient(circle, #e5a65d 0%, #b0722a 100%); border-radius: 50%; border: 6px solid #ff9a3c; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.05s ease; position: relative; margin: 0 auto; }
+        .cookie-btn:active { transform: scale(0.95); }
+        .cookie-btn::after { content: ''; position: absolute; width: 25px; height: 25px; background: #7c4413; border-radius: 50%; top: 40px; left: 50px; box-shadow: 60px 20px 0 #7c4413, 30px 70px 0 #7c4413, 80px 100px 0 #7c4413, -10px 60px 0 #7c4413; }
+        .cps-info { margin-top: 20px; font-size: 1.1rem; color: #c5c6c7; font-weight: bold; }
+        .shop-grid { display: flex; gap: 10px; margin-top: 25px; }
+        .shop-item { background: #1f2833; border: 1px solid #ff9a3c; padding: 10px 20px; border-radius: 4px; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .shop-item:hover { background: #ffc93c; color: #0b0c10; }
+    </style>
+</head>
+<body>
+    <div class="cookie-wrapper">
+        <div class="counter" id="cookie-count">0 Cookies</div>
+        <div class="cookie-btn" onclick="clickCookie()"></div>
+        <div class="cps-info" id="cps-display">Per Second: 0</div>
+        <div class="shop-grid">
+            <button class="shop-item" onclick="buyUpgrade(10, 1)">Cursor (Cost: 10)</button>
+            <button class="shop-item" onclick="buyUpgrade(100, 8)">Grandma (Cost: 100)</button>
+        </div>
+    </div>
+    <script>
+        let cookies = 0; let cps = 0;
+        function updateDisplay() {
+            document.getElementById('cookie-count').innerText = Math.floor(cookies) + " Cookies";
+            document.getElementById('cps-display').innerText = "Per Second: " + cps.toFixed(1);
+        }
+        function clickCookie() { cookies += 1; updateDisplay(); }
+        function buyUpgrade(cost, power) {
+            if (cookies >= cost) {
+                cookies -= cost; cps += power; updateDisplay();
+                // Increase next upgrade cost dynamically
+                event.target.innerText = event.target.innerText.split('(')[0] + "(Cost: " + Math.floor(cost * 1.3) + ")";
+                event.target.setAttribute('onclick', `buyUpgrade(${Math.floor(cost * 1.3)}, ${power})`);
+            }
+        }
+        setInterval(() => { if (cps > 0) { cookies += cps / 10; updateDisplay(); } }, 100);
+    </script>
+</body>
+</html>
