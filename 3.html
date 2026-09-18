@@ -9,13 +9,12 @@
         canvas { width: 100vw; height: 100vh; display: block; background: #80c0ff; cursor: crosshair; }
         .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(20, 20, 20, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100; }
         .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.75); padding: 6px; border-radius: 4px; border: 2px solid #333; z-index: 100; }
-        .slot { width: 45px; height: 45px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid transparent; color: #fff; font-size: 1rem; text-shadow: 1px 1px 2px #000; }
+        .slot { width: 45px; height: 45px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid transparent; color: #fff; font-size: 1.1rem; text-shadow: 1px 1px 2px #000; }
         .slot.active { border-color: #ffffff; background: rgba(255,255,255,0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        /* 🧱 CLASSICCUBE HOTBAR SLOT STYLES */
-        .slot-1 { background-color: #5c8e32; border-bottom: 4px solid #3b571e; } /* Grass */
-        .slot-2 { background-color: #7a7a7a; border-bottom: 4px solid #555555; } /* Cobble */
-        .slot-3 { background-color: #6b533b; border-bottom: 4px solid #4a3b29; } /* Oak Log */
-        .slot-4 { background-color: #b55346; border-bottom: 4px solid #7c352e; } /* Brick */
+        .slot-1 { background-color: #6ba33b; border-bottom: 4px solid #3b571e; }
+        .slot-2 { background-color: #7a7a7a; border-bottom: 4px solid #555555; }
+        .slot-3 { background-color: #a3835b; border-bottom: 4px solid #6b533b; }
+        .slot-4 { background-color: #b55346; border-bottom: 4px solid #7c352e; }
         .crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); pointer-events: none; z-index: 100; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.85); mix-blend-mode: difference; }
         .crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
@@ -36,10 +35,10 @@
 
     <div class="crosshair"></div>
     <div class="hotbar">
-        <div class="slot slot-1 active" id="slot-1">1</div>
-        <div class="slot slot-2" id="slot-2">2</div>
-        <div class="slot slot-3" id="slot-3">3</div>
-        <div class="slot slot-4" id="slot-4">4</div>
+        <div class="slot slot-1 active" id="slot-1">G</div>
+        <div class="slot slot-2" id="slot-2">C</div>
+        <div class="slot slot-3" id="slot-3">O</div>
+        <div class="slot slot-4" id="slot-4">B</div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -55,17 +54,25 @@
         window.addEventListener('resize', resize);
         resize();
 
-        let player = { x: 6.5, y: 7.0, z: 6.5, pitch: 0, yaw: 0, velocityY: 0, onGround: false };
+        let player = { x: 7.5, y: 6.5, z: 7.5, pitch: 0, yaw: 0, velocityY: 0, onGround: false };
         let activeBlock = 1;
         const world = {};
 
-        // Generate Starting Platform 
-        for (let x = 0; x < 14; x++) {
-            for (let z = 0; z < 14; z++) {
+        // Texture Face Profiles Matrix 
+        const faceColors = {
+            1: { top: '#6ba33b', side: '#4d7528', bottom: '#866043' }, // Grass
+            2: { top: '#8a8a8a', side: '#6e6e6e', bottom: '#555555' }, // Cobble
+            3: { top: '#a3835b', side: '#6b533b', bottom: '#a3835b' }, // Oak Log
+            4: { top: '#b55346', side: '#a1453a', bottom: '#b55346' }  // Brick
+        };
+
+        // Build Plateau World Ground 
+        for (let x = 0; x < 15; x++) {
+            for (let z = 0; z < 15; z++) {
                 let height = 3; 
                 for (let y = 0; y <= height; y++) {
-                    let type = 2; // Cobble Base
-                    if (y === height) type = 1; // Grass Surface
+                    let type = 2; // Cobble floor depth
+                    if (y === height) type = 1; // Grass field top skin
                     world[`${x},${y},${z}`] = type;
                 }
             }
@@ -76,7 +83,7 @@
         document.addEventListener('mousemove', e => {
             if (document.pointerLockElement === canvas) {
                 player.yaw -= e.movementX * 0.0025;
-                player.pitch += e.movementY * 0.0025; // Look up/down fixed orientation
+                player.pitch += e.movementY * 0.0025; // Clean mouse movement orientation
                 player.pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, player.pitch));
             }
         });
@@ -112,7 +119,7 @@
                 z: finalZ
             };
         }
-        // 🖱️ DYNAMIC RAYCASTING ENGINE (Breaking & Placing Blocks)
+        // 🖱️ FIRST-PERSON INTERACTION RAYCASTING ENGINE (Mining & Placing Blocks)
         window.addEventListener('mousedown', e => {
             if (document.pointerLockElement !== canvas) return;
 
@@ -160,10 +167,9 @@
             ctx.lineTo(pts[3].x, pts[3].y);
             ctx.closePath();
 
-            // Set texture canvas baselines
             let baseColors = {
-                1: { top: '#6ba33b', side: '#73523a', bottom: '#523826' }, // Grass Block
-                2: { top: '#7a7a7a', side: '#6e6e6e', bottom: '#555555' }, // Cobblestone
+                1: { top: '#6ba33b', side: '#4d7528', bottom: '#866043' }, // Grass Block
+                2: { top: '#8a8a8a', side: '#6e6e6e', bottom: '#555555' }, // Cobblestone
                 3: { top: '#a3835b', side: '#6b533b', bottom: '#a3835b' }, // Oak Log
                 4: { top: '#b55346', side: '#a1453a', bottom: '#b55346' }  // Bricks
             };
@@ -179,7 +185,7 @@
                     ctx.beginPath();
                     ctx.moveTo(pts[i].x, pts[i].y);
                     ctx.lineTo((pts[i].x + pts[(i+1)%4].x)/2, (pts[i].y + pts[(i+1)%4].y)/2);
-                    ctx.lineTo((pts[0].x + pts[2].x)/2, (pts[0].y + pts[2].y)/2);
+                    ctx.lineTo((pts[2].x + pts[0].x)/2, (pts[2].y + pts[0].y)/2);
                     ctx.closePath();
                     ctx.fill();
                 }
