@@ -5,41 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Arcade Session - 3</title>
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        #canvas { width: 100vw; height: 100vh; display: block; background: #000; }
-        .stealth-boot-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffc93c; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+        /* 🚀 FORCE THE TRUE APP TO OVERLAY THE ENTIRE SCREEN WINDOW */
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
     </style>
 </head>
 <body>
 
-    <div class="stealth-boot-loader" id="loader-msg">Launching Secure Environment...</div>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-
-    <script type='text/javascript'>
-        // Initialize the native C++ game engine hooks inside the browser canvas
-        var Module = {
-            preRun: [],
-            postRun: [],
-            arguments: ["Player"],
-            print: function(text) { console.log(text); },
-            printErr: function(text) { console.error(text); },
-            canvas: (function() {
-                var canvas = document.getElementById('canvas');
-                return canvas;
-            })(),
-            setStatus: function(text) {
-                var msg = document.getElementById('loader-msg');
-                if (!text) {
-                    msg.style.display = 'none';
-                } else {
-                    msg.innerHTML = text;
-                }
-            }
-        };
-    </script>
-    
-    <!-- 🚀 Bypasses the Amazon S3 blocks using a public unblocked open-source CDN script mirror -->
-    <script async src="https://github.io"></script>
+    <!-- This securely loads the true web platform inside your domain folder -->
+    <iframe src="https://classiccube.net" allowtransparency="true" allowfullscreen></iframe>
 
 </body>
 </html>
