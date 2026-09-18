@@ -3,18 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core Engine - 4</title>
+    <title>Core Engine - 3</title>
     <style>
-        html, body { height: 100%; margin: 0; background: #0b0c10; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; overflow: hidden; user-select: none; }
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            background: #0b0c10; 
+            color: #fff; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            user-select: none; 
+        }
         .cookie-wrapper { text-align: center; }
-        .counter { font-size: 2.5rem; font-weight: bold; color: #ffc93c; margin-bottom: 20px; text-shadow: 0 0 10px rgba(255,201,60,0.3); }
-        .cookie-btn { width: 200px; height: 200px; background: radial-gradient(circle, #e5a65d 0%, #b0722a 100%); border-radius: 50%; border: 6px solid #ff9a3c; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.05s ease; position: relative; margin: 0 auto; }
+        .counter { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            color: #ffc93c; 
+            margin-bottom: 20px; 
+            text-shadow: 0 0 10px rgba(255,201,60,0.3); 
+        }
+        .cookie-btn { 
+            width: 180px; 
+            height: 180px; 
+            background: radial-gradient(circle, #e5a65d 0%, #b0722a 100%); 
+            border-radius: 50%; 
+            border: 6px solid #ff9a3c; 
+            cursor: pointer; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            transition: transform 0.05s ease; 
+            position: relative; 
+            margin: 0 auto; 
+        }
         .cookie-btn:active { transform: scale(0.95); }
-        .cookie-btn::after { content: ''; position: absolute; width: 25px; height: 25px; background: #7c4413; border-radius: 50%; top: 40px; left: 50px; box-shadow: 60px 20px 0 #7c4413, 30px 70px 0 #7c4413, 80px 100px 0 #7c4413, -10px 60px 0 #7c4413; }
-        .cps-info { margin-top: 20px; font-size: 1.1rem; color: #c5c6c7; font-weight: bold; }
-        .shop-grid { display: flex; gap: 10px; margin-top: 25px; }
-        .shop-item { background: #1f2833; border: 1px solid #ff9a3c; padding: 10px 20px; border-radius: 4px; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .cookie-btn::after { 
+            content: ''; 
+            position: absolute; 
+            width: 20px; 
+            height: 20px; 
+            background: #7c4413; 
+            border-radius: 50%; 
+            top: 40px; 
+            left: 45px; 
+            box-shadow: 50px 20px 0 #7c4413, 25px 60px 0 #7c4413, 70px 90px 0 #7c4413, -10px 50px 0 #7c4413; 
+        }
+        .cps-info { margin-top: 15px; font-size: 1.1rem; color: #c5c6c7; font-weight: bold; }
+        .shop-grid { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        .shop-item { 
+            background: #1f2833; 
+            border: 1px solid #ff9a3c; 
+            padding: 10px 15px; 
+            border-radius: 4px; 
+            color: #fff; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.2s; 
+        }
         .shop-item:hover { background: #ffc93c; color: #0b0c10; }
+        
+        /* 💾 SYSTEM SAVE ACTIONS BLOCK */
+        .save-system-row { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 30px; 
+            justify-content: center; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            padding-top: 20px; 
+        }
+        .btn-action { 
+            background: #0f131a; 
+            border: 1px solid #ffc93c; 
+            color: #ffc93c; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            font-size: 0.8rem; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
+        .btn-action:hover { background: #ffc93c; color: #0b0c10; }
+        #hidden-upload-input { display: none; }
     </style>
 </head>
 <body>
@@ -22,27 +92,132 @@
         <div class="counter" id="cookie-count">0 Cookies</div>
         <div class="cookie-btn" onclick="clickCookie()"></div>
         <div class="cps-info" id="cps-display">Per Second: 0</div>
+        
         <div class="shop-grid">
-            <button class="shop-item" onclick="buyUpgrade(10, 1)">Cursor (Cost: 10)</button>
-            <button class="shop-item" onclick="buyUpgrade(100, 8)">Grandma (Cost: 100)</button>
+            <button class="shop-item" id="cursor-btn" onclick="buyUpgrade('cursor', 10, 1)">Cursor (Cost: 10)</button>
+            <button class="shop-item" id="grandma-btn" onclick="buyUpgrade('grandma', 100, 8)">Grandma (Cost: 100)</button>
+        </div>
+
+        <!-- 💾 EXTERNAL DATA EXPORT COMPONENT FRAME -->
+        <div class="save-system-row">
+            <button class="btn-action" onclick="exportProgress()">Save to File</button>
+            <button class="btn-action" onclick="triggerImport()">Load from File</button>
+            <input type="file" id="hidden-upload-input" accept=".html" onchange="importProgress(event)">
         </div>
     </div>
+
     <script>
-        let cookies = 0; let cps = 0;
+        // Game save state object model 
+        let gameData = {
+            cookies: 0,
+            cps: 0,
+            cursorCost: 10,
+            grandmaCost: 100
+        };
+
         function updateDisplay() {
-            document.getElementById('cookie-count').innerText = Math.floor(cookies) + " Cookies";
-            document.getElementById('cps-display').innerText = "Per Second: " + cps.toFixed(1);
+            document.getElementById('cookie-count').innerText = Math.floor(gameData.cookies).toLocaleString() + " Cookies";
+            document.getElementById('cps-display').innerText = "Per Second: " + gameData.cps.toFixed(1);
+            document.getElementById('cursor-btn').innerText = "Cursor (Cost: " + gameData.cursorCost + ")";
+            document.getElementById('grandma-btn').innerText = "Grandma (Cost: " + gameData.grandmaCost + ")";
         }
-        function clickCookie() { cookies += 1; updateDisplay(); }
-        function buyUpgrade(cost, power) {
-            if (cookies >= cost) {
-                cookies -= cost; cps += power; updateDisplay();
-                // Increase next upgrade cost dynamically
-                event.target.innerText = event.target.innerText.split('(')[0] + "(Cost: " + Math.floor(cost * 1.3) + ")";
-                event.target.setAttribute('onclick', `buyUpgrade(${Math.floor(cost * 1.3)}, ${power})`);
+
+        function clickCookie() { 
+            gameData.cookies += 1; 
+            updateDisplay(); 
+        }
+
+        function buyUpgrade(type, baseCost, power) {
+            let cost = type === 'cursor' ? gameData.cursorCost : gameData.grandmaCost;
+            if (gameData.cookies >= cost) {
+                gameData.cookies -= cost;
+                gameData.cps += power;
+                
+                if (type === 'cursor') {
+                    gameData.cursorCost = Math.floor(gameData.cursorCost * 1.3);
+                } else {
+                    gameData.grandmaCost = Math.floor(gameData.grandmaCost * 1.3);
+                }
+                updateDisplay();
+                saveToLocalStorage(); // Auto-saves locally on the browser background
             }
         }
-        setInterval(() => { if (cps > 0) { cookies += cps / 10; updateDisplay(); } }, 100);
+
+        // 🔄 AUTO-SAVE BACKEND STORAGE MANAGEMENT
+        function saveToLocalStorage() {
+            localStorage.setItem('wellandwill_cookies_save', JSON.stringify(gameData));
+        }
+
+        function loadFromLocalStorage() {
+            let backup = localStorage.getItem('wellandwill_cookies_save');
+            if (backup) {
+                gameData = JSON.parse(backup);
+                updateDisplay();
+            }
+        }
+
+        // 💾 EXPORT PROGRESS AS PORTABLE HTML BACKUP DATA
+        function exportProgress() {
+            saveToLocalStorage();
+            let stateString = btoa(JSON.stringify(gameData)); // Compresses string securely into string blocks
+            
+            // Constructs a portable self-contained html container template file download wrapper
+            let htmlData = `<!DOCTYPE html><html><head><title>Backup</title></head><body><div id="save-payload">${stateString}</div><script>alert("This is your backup profile file! Upload it inside your admin vault at wellandwill.co.uk/3 to restore your game scores!");<\/script></body></html>`;
+            
+            let blob = new Blob([htmlData], { type: "text/html" });
+            let tempLink = document.createElement("a");
+            tempLink.href = URL.createObjectURL(blob);
+            tempLink.download = "cookie_clicker_progress.html";
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+        }
+
+        function triggerImport() {
+            document.getElementById('hidden-upload-input').click();
+        }
+
+        // 📥 IMPORT BACKUP FILE DATA
+        function importProgress(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let fileContents = e.target.result;
+                try {
+                    // Extract payload block strings from the uploaded HTML data wrapper container templates
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(fileContents, 'text/html');
+                    let rawPayload = doc.getElementById('save-payload').innerText;
+                    
+                    let loadedData = JSON.parse(atob(rawPayload));
+                    if (loadedData && typeof loadedData.cookies === 'number') {
+                        gameData = loadedData;
+                        saveToLocalStorage();
+                        updateDisplay();
+                        alert("Cookies progress loaded successfully!");
+                    }
+                } catch(err) {
+                    alert("Error processing save profile backup syntax!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Run game tickers
+        setInterval(() => { 
+            if (gameData.cps > 0) { 
+                gameData.cookies += gameData.cps / 10; 
+                updateDisplay(); 
+            } 
+        }, 100);
+
+        // Periodically run backup storage dumps every 10 seconds automatically
+        setInterval(saveToLocalStorage, 10000);
+
+        // Load baseline data parameters on page init frames
+        window.addEventListener('DOMContentLoaded', loadFromLocalStorage);
     </script>
 </body>
 </html>
