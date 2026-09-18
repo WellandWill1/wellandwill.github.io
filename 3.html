@@ -5,169 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Arcade - 3</title>
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; background: #0b0c10; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        canvas { width: 100vw; height: 100vh; display: block; cursor: crosshair; }
-        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(31, 40, 51, 0.85); border: 1px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.4; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-        .crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 100%; transform: translate(-50%, -50%); pointer-events: none; }
-        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.7); }
-        .crosshair::before { top: 4px; left: -5px; width: 10px; height: 2px; }
-        .crosshair::after { top: -1px; left: -1px; width: 2px; height: 12px; }
+        html, body { height: 100%; margin: 0; padding: 0; background: #40a0ff; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        canvas { width: 100vw; height: 100vh; display: block; background: #40a0ff; }
+        .controls-overlay { position: absolute; top: 15px; left: 15px; background: rgba(31, 40, 51, 0.9); border: 2px solid #ffc93c; padding: 15px; border-radius: 6px; color: #fff; font-size: 0.85rem; pointer-events: none; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); }
+        .slot { width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid transparent; color: #fff; font-size: 0.8rem; }
+        .slot.active { border-color: #ffc93c; background: rgba(255,255,255,0.1); }
+        .slot-1 { background-color: #557a2b; } /* Grass */
+        .slot-2 { background-color: #866043; } /* Dirt */
+        .slot-3 { background-color: #7a7a7a; } /* Stone */
+        .slot-4 { background-color: #b0722a; } /* Wood */
     </style>
 </head>
 <body>
+
     <div class="controls-overlay">
-        <strong style="color: #ffc93c; text-transform: uppercase;">Unblocked Craft v1.0</strong><br>
-        • Move: <span style="color: #ff9a3c;">W, A, S, D</span><br>
-        • Look: <span style="color: #ff9a3c;">Move Mouse</span> (Click canvas to lock)<br>
+        <strong style="color: #ffc93c; text-transform: uppercase;">Unblocked Craft 2D</strong><br>
+        • Move Camera: <span style="color: #ff9a3c;">A, D / Arrow Keys</span><br>
         • Break Block: <span style="color: #ff9a3c;">Left Click</span><br>
-        • Place Block: <span style="color: #ff9a3c;">Right Click</span><br>
-        • Switch Block: <span style="color: #ff9a3c;">1, 2, 3</span>
+        • Place Block: <span style="color: #ff9a3c;">Shift + Left Click</span><br>
+        • Select Block: <span style="color: #ff9a3c;">Keys 1, 2, 3, 4</span>
     </div>
-    <div class="crosshair"></div>
-    <canvas id="renderCanvas"></canvas>
 
-    <!-- Three.js 3D Rendering Library compiled over unblocked raw source CDN -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Hotbar Display -->
+    <div class="hotbar">
+        <div class="slot slot-1 active" id="slot-1">1</div>
+        <div class="slot slot-2" id="slot-2">2</div>
+        <div class="slot slot-3" id="slot-3">3</div>
+        <div class="slot slot-4" id="slot-4">4</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
     <script>
-        const canvas = document.getElementById('renderCanvas');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x40a0ff); // Sky blue background
-        scene.fog = new THREE.FogExp2(0x40a0ff, 0.05);
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
+        // Setup clean responsive windows scaling
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
-        // Lighting Matrix
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(20, 40, 20);
-        scene.add(directionalLight);
+        const blockSize = 32;
+        let cameraX = 0;
+        let activeSlot = 1;
+        const world = {};
 
-        // Core Texture Blocks Map Layout
-        const loader = new THREE.TextureLoader();
-        const blockTypes = {
-            1: new THREE.MeshLambertMaterial({ color: 0x557a2b }), // Grass
-            2: new THREE.MeshLambertMaterial({ color: 0x866043 }), // Dirt
-            3: new THREE.MeshLambertMaterial({ color: 0x7a7a7a })  // Stone
+        // Local Block Texture Color Mapping Matrix
+        const blockColors = {
+            1: '#557a2b', // Grass
+            2: '#866043', // Dirt
+            3: '#7a7a7a', // Stone
+            4: '#b0722a'  // Wood
         };
-        let activeBlockType = 1;
 
-        // Generate Terrain Blocks Grid Array Locally
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const objects = [];
-        const worldSize = 24;
+        // Procedural World Terrain Generator Logic (Generates completely inside browser memory)
+        function generateChunk(chunkX) {
+            for (let x = 0; x < 20; x++) {
+                const globalX = chunkX * 20 + x;
+                if (world[globalX]) continue;
 
-        for (let x = -worldSize; x < worldSize; x++) {
-            for (let z = -worldSize; z < worldSize; z++) {
-                // Procedural generation height simulation equation
-                let height = Math.floor((Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 2) + 4;
-                for (let y = 0; y <= height; y++) {
-                    let material = blockTypes[2]; // Default dirt
-                    if (y === height) material = blockTypes[1]; // Grass top
-                    if (y < height - 2) material = blockTypes[3]; // Stone deep roots
+                world[globalX] = {};
+                // Terrain sine wave generation mathematical layout height rules
+                const groundY = Math.floor(Math.sin(globalX * 0.1) * 3) + 12;
 
-                    const mesh = new THREE.Mesh(geometry, material);
-                    mesh.position.set(x, y, z);
-                    scene.add(mesh);
-                    objects.push(mesh);
+                for (let y = 0; y < 30; y++) {
+                    if (y === groundY) world[globalX][y] = 1; // Surface Layer: Grass
+                    else if (y > groundY && y < groundY + 4) world[globalX][y] = 2; // Middle Layer: Dirt
+                    else if (y >= groundY + 4) world[globalX][y] = 3; // Deep Layer: Stone
                 }
             }
         }
 
-        // Camera Player Control Variable Configurations
-        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let yaw = 0, pitch = 0;
-        camera.position.set(0, 10, 0);
-
-        canvas.addEventListener('click', () => { canvas.requestPointerLock(); });
-
-        document.addEventListener('mousemove', (e) => {
-            if (document.pointerLockElement === canvas) {
-                yaw -= e.movementX * 0.002;
-                pitch -= e.movementY * 0.002;
-                pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
-
-                const am = new THREE.Euler(0, 0, 0, 'YXZ');
-                am.set(pitch, yaw, 0);
-                camera.quaternion.setFromEuler(am);
-            }
+        // Camera Pan Controller Inputs
+        let keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (e.key === '1') selectSlot(1);
+            if (e.key === '2') selectSlot(2);
+            if (e.key === '3') selectSlot(3);
+            if (e.key === '4') selectSlot(4);
         });
+        window.addEventListener('keyup', e => keys[e.code] = false);
 
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyW') moveForward = true;
-            if (e.code === 'KeyS') moveBackward = true;
-            if (e.code === 'KeyA') moveLeft = true;
-            if (e.code === 'KeyD') moveRight = true;
-            if (e.key === '1') activeBlockType = 1;
-            if (e.key === '2') activeBlockType = 2;
-            if (e.key === '3') activeBlockType = 3;
-        });
+        function selectSlot(slot) {
+            document.getElementById(`slot-${activeSlot}`).classList.remove('active');
+            activeSlot = slot;
+            document.getElementById(`slot-${activeSlot}`).classList.add('active');
+        }
 
-        document.addEventListener('keyup', (e) => {
-            if (e.code === 'KeyW') moveForward = false;
-            if (e.code === 'KeyS') moveBackward = false;
-            if (e.code === 'KeyA') moveLeft = false;
-            if (e.code === 'KeyD') moveRight = false;
-        });
+        // Mouse Interactivity Physics (Mining & Building grids)
+        window.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left + cameraX;
+            const clickY = e.clientY - rect.top;
 
-        // Break & Place Block Interactions Mechanics Array
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2(0, 0);
+            const blockX = Math.floor(clickX / blockSize);
+            const blockY = Math.floor(clickY / blockSize);
 
-        window.addEventListener('mousedown', (e) => {
-            if (document.pointerLockElement !== canvas) return;
-            raycaster.setFromCamera(mouse, camera);
-            const intersections = raycaster.intersectObjects(objects);
+            if (!world[blockX]) world[blockX] = {};
 
-            if (intersections.length > 0) {
-                const intersect = intersections[0];
-                
-                if (e.button === 0) { // Left Click Break Block
-                    scene.remove(intersect.object);
-                    const index = objects.indexOf(intersect.object);
-                    if (index > -1) objects.splice(index, 1);
-                } 
-                else if (e.button === 2) { // Right Click Place Block
-                    const mesh = new THREE.Mesh(geometry, blockTypes[activeBlockType]);
-                    mesh.position.copy(intersect.object.position).add(intersect.face.normal);
-                    scene.add(mesh);
-                    objects.push(mesh);
+            if (e.shiftKey) {
+                // Shift + Click: Place Block
+                if (!world[blockX][blockY]) {
+                    world[blockX][blockY] = activeSlot;
+                }
+            } else {
+                // Click: Mine/Break Block
+                if (world[blockX][blockY]) {
+                    delete world[blockX][blockY];
                 }
             }
         });
 
-        // Smooth Rendering Movement Game Loop execution updates
-        const clock = new THREE.Clock();
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-            const speed = 6;
-
-            if (document.pointerLockElement === canvas) {
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction);
-                direction.y = 0;
-                direction.normalize();
-
-                const sideDirection = new THREE.Vector3();
-                sideDirection.copy(direction).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-                if (moveForward) camera.position.addScaledVector(direction, speed * delta);
-                if (moveBackward) camera.position.addScaledVector(direction, -speed * delta);
-                if (moveLeft) camera.position.addScaledVector(sideDirection, speed * delta);
-                if (moveRight) camera.position.addScaledVector(sideDirection, -speed * delta);
-            }
-            renderer.render(scene, camera);
+        // Principal Core Game Engine Execution Loops
+        function update() {
+            if (keys['KeyA'] || keys['ArrowLeft']) cameraX -= 5;
+            if (keys['KeyD'] || keys['ArrowRight']) cameraX += 5;
+            if (cameraX < -5000) cameraX = -5000;
         }
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        animate();
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sky Backdrop Gradients Elements
+            ctx.fillStyle = '#40a0ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const startChunk = Math.floor(cameraX / (20 * blockSize)) - 1;
+            const endChunk = startChunk + Math.ceil(canvas.width / (20 * blockSize)) + 2;
+
+            for (let c = startChunk; c <= endChunk; c++) {
+                generateChunk(c);
+            }
+
+            const startX = Math.floor(cameraX / blockSize) - 1;
+            const endX = startX + Math.ceil(canvas.width / blockSize) + 2;
+
+            for (let x = startX; x <= endX; x++) {
+                if (!world[x]) continue;
+                for (let y = 0; y < 40; y++) {
+                    const blockType = world[x][y];
+                    if (blockType && blockColors[blockType]) {
+                        ctx.fillStyle = blockColors[blockType];
+                        ctx.fillRect(x * blockSize - cameraX, y * blockSize, blockSize, blockSize);
+                        
+                        // Clean outline borders defining the grid lines structure look
+                        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                        ctx.strokeRect(x * blockSize - cameraX, y * blockSize, blockSize, blockSize);
+                    }
+                }
+            }
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
     </script>
 </body>
 </html>
