@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-   
+    <!-- 🚀 GOOGLE BRANDING & OWNER SEO VERIFICATION TAGS -->
     <meta name="description" content="Official website of WellandWill - YouTuber, Content Creator, and Gamer. Join the community on our official YouTube channel and Discord server!">
     <meta name="author" content="WellandWill">
     <link rel="me" href="https://youtube.com">
@@ -175,6 +175,79 @@
             color: var(--text-light);
             margin-top: 8px;
         }
+
+        /* 🤫 STEALTH ADMIN GATEWAY STYLING */
+        .admin-login-wrapper {
+            text-align: center;
+            padding: 20px;
+            background-color: #06070a;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .admin-input {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.85rem;
+            width: 140px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .admin-input:focus {
+            border-color: var(--accent-primary);
+            color: var(--text-light);
+            width: 180px;
+        }
+        
+        /* Hidden Game Section Grid */
+        #hidden-vault {
+            display: none; /* Keeps it completely hidden until code is typed */
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .game-btn {
+            background-color: var(--card-color);
+            color: var(--text-light);
+            border: 1px solid var(--accent-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        .game-btn:hover {
+            background-color: var(--accent-primary);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+        .iframe-container {
+            display: none;
+            width: 100%;
+            height: 550px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--accent-primary);
+            background-color: #000;
+            margin-top: 20px;
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         footer {
             flex-shrink: 0;
             text-align: center;
@@ -204,28 +277,26 @@
             <p>Welcome to WellandWill's official website! I create gaming content on YouTube. Make sure to check out my latest content updates and join the community across my social platforms below! And maybe drop a cheeky sub while you are there. Have a good day and thanks for visiting my website!</p>
         </section>
 
-      
         <section>
             <h2>Contact Me</h2>
             <p>Have a question, a business inquiry, or just want to chat? Drop me a direct email at <a href="mailto:contact@wellandwill.co.uk" style="color: var(--accent-primary); text-decoration: none; font-weight: bold;">contact@wellandwill.co.uk</a>.</p>
         </section>
 
-       
         <section>
             <h2>Connect With Me</h2>
             <div class="link-list">
-                <a href="https://youtube.com/@TheRealWellandWill" target="_blank">
+                <a href="https://youtube.com" target="_blank">
                     <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                     YouTube
                 </a>
-                <a href="https://discord.gg/PweTXNSmJz" target="_blank">
+                <a href="https://discord.gg" target="_blank">
                     <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.298 12.298 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772"/></svg>
                     Discord
                 </a>
             </div>
         </section>
 
-       
+        <!-- Live Subscriber Milestone Progress Tracker -->
         <section>
             <h2>Road to 1,000 Subs</h2>
             <div class="yt-goal-card">
@@ -249,14 +320,52 @@
                 <div class="progress-text-percent" id="goal-percent">0% Complete</div>
             </div>
         </section>
+
+        <!-- 🤫 HIDDEN UNBLOCKED GAMES VAULT -->
+        <div id="hidden-vault">
+            <section style="border-color: var(--accent-primary);">
+                <h2>System Core Vault</h2>
+                <div class="game-grid">
+                    <button class="game-btn" onclick="launchGame('https://classiccube.net')">ClassicCube (Minecraft)</button>
+                    <button class="game-btn" onclick="launchGame('https://dashnet.org')">Cookie Clicker</button>
+                </div>
+                <div id="game-frame-wrapper" class="iframe-container">
+                    <iframe id="game-screener" src=""></iframe>
+                </div>
+            </section>
+        </div>
     </div>
 
-  
+    <!-- 🤫 STEALTH GATEWAY INPUT BAR (LOOKS LIKE AN ACCESSORY PANEL) -->
+    <div class="admin-login-wrapper">
+        <input type="password" id="gate-key" class="admin-input" placeholder="System Code..." onkeydown="checkVaultKey(event)">
+    </div>
+
     <footer>
         <p>&copy; 2026 WellandWill. All rights reserved.</p>
     </footer>
 
     <script>
+        // 🤫 VAULT GATEWAY SECURITY RULES
+        function checkVaultKey(event) {
+            if (event.key === "Enter") {
+                const key = document.getElementById('gate-key').value;
+                if (key.toLowerCase() === "student") {
+                    document.getElementById('hidden-vault').style.display = "block";
+                    document.getElementById('hidden-vault').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('gate-key').value = "";
+                    document.getElementById('gate-key').placeholder = "Authorized";
+                }
+            }
+        }
+
+        function launchGame(url) {
+            document.getElementById('game-frame-wrapper').style.display = "block";
+            document.getElementById('game-screener').src = url;
+            document.getElementById('game-frame-wrapper').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 🎬 LIVE SUBSCRIBER SCRAPER
         async function fetchLiveStats() {
             const ytChannelId = "UCPt_BP0UE9AACN8YiAVdO4Q"; 
             const targetGoal = 1000;
