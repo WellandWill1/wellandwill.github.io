@@ -210,42 +210,26 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
         }
-        .game-btn {
+        /* 🕹️ STYLED ARCADE ANCHORS CHANNELS */
+        .game-link-btn {
+            display: block;
+            text-align: center;
             background-color: var(--card-color);
             color: var(--text-light);
             border: 1px solid var(--accent-secondary);
             padding: 15px;
             border-radius: 6px;
             font-weight: bold;
-            cursor: pointer;
+            text-decoration: none;
             text-transform: uppercase;
             transition: all 0.2s ease;
         }
-        .game-btn:hover {
+        .game-link-btn:hover {
             background-color: var(--accent-primary);
             color: var(--bg-color);
             box-shadow: 0 0 10px var(--accent-primary);
-        }
-        
-        /* STREAMLINED IFRAME CONTAINER (No extra spacers or bulky margins) */
-        .iframe-container {
-            display: none;
-            width: 100%;
-            height: 520px;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 2px solid var(--accent-primary);
-            background-color: #0b0c10;
-            margin-top: 15px;
-        }
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            margin: 0;
-            padding: 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -328,14 +312,12 @@
 
         <!-- 🤫 HIDDEN UNBLOCKED GAMES VAULT -->
         <div id="hidden-vault">
-            <section style="border-color: var(--accent-primary); padding: 20px 25px 25px 25px;">
+            <section style="border-color: var(--accent-primary); padding: 25px;">
                 <h2>System Core Vault</h2>
                 <div class="game-grid">
-                    <button class="game-btn" onclick="launchGame('/1')">Game Session 1 (Snake)</button>
-                    <button class="game-btn" onclick="launchGame('/2')">Game Session 2 (Tetris)</button>
-                </div>
-                <div id="game-frame-wrapper" class="iframe-container">
-                    <iframe id="game-screener" src=""></iframe>
+                    <!-- 🌟 DIRECT NAVIGATION INTERCEPTS FOR FULL-SCREEN ARCADE SESSIONS -->
+                    <a href="/1" class="game-link-btn">Game Session 1 (Snake)</a>
+                    <a href="/2" class="game-link-btn">Game Session 2 (Tetris)</a>
                 </div>
             </section>
         </div>
@@ -363,12 +345,6 @@
             }
         }
 
-        function launchGame(url) {
-            document.getElementById('game-frame-wrapper').style.display = "block";
-            document.getElementById('game-screener').src = url;
-            document.getElementById('game-frame-wrapper').scrollIntoView({ behavior: 'smooth' });
-        }
-
         // 🎬 MULTI-LAYER BACKEND DATA FALLBACK SYSTEM (Pulls automatic stats securely)
         async function fetchLiveStats() {
             const ytChannelId = "UCPt_BP0UE9AACN8YiAVdO4Q"; 
@@ -376,7 +352,7 @@
             
             try {
                 const apiResponse = await fetch(`https://allorigins.win{encodeURIComponent('https://subscribercount.org' + ytChannelId)}`);
-                let subCount = 303; // Real core baseline
+                let subCount = 303; // Core baseline parameter
 
                 if (apiResponse.ok) {
                     const wrapper = await apiResponse.json();
