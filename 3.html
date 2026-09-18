@@ -3,18 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Core Engine - 3</title>
+    <title>Arcade Session - 3</title>
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; background: #0b0c10; overflow: hidden; font-family: sans-serif; }
+        html, body { height: 100%; margin: 0; padding: 0; background: #0b0c10; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         #canvas { width: 100vw; height: 100vh; display: block; }
-        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffc93c; font-weight: bold; font-size: 1.5rem; letter-spacing: 1px; }
+        .stealth-load { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffc93c; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <div id="loading">INITIALIZING PROTOCOL...</div>
+    <div class="stealth-load" id="status">Loading System Core...</div>
     <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-    
-    <!-- Official OpenSource JS Engine Compilation Built Locally -->
-    <script src="https://amazonaws.com" async onload="document.getElementById('loading').style.display='none';"></script>
+
+    <script type='text/javascript'>
+        // Native browser environment configurations for unblocked compiling
+        var Module = {
+            preRun: [],
+            postRun: [],
+            arguments: ["ClassiCube User"],
+            print: function(text) { console.log(text); },
+            printErr: function(text) { console.error(text); },
+            canvas: (function() {
+                var canvas = document.getElementById('canvas');
+                return canvas;
+            })(),
+            setStatus: function(text) {
+                var statusElement = document.getElementById('status');
+                if (!text) {
+                    statusElement.style.display = 'none';
+                } else {
+                    statusElement.innerHTML = text;
+                }
+            }
+        };
+    </script>
+    <!-- Master open source WebGL execution bridge engine -->
+    <script async src="https://amazonaws.com"></script>
 </body>
 </html>
