@@ -201,9 +201,8 @@
             width: 180px;
         }
         
-        /* Hidden Game Section Grid */
         #hidden-vault {
-            display: none; /* Keeps it completely hidden until code is typed */
+            display: none; 
             margin-top: 30px;
             animation: fadeIn 0.5s ease;
         }
@@ -229,20 +228,24 @@
             color: var(--bg-color);
             box-shadow: 0 0 10px var(--accent-primary);
         }
+        
+        /* STREAMLINED IFRAME CONTAINER (No extra spacers or bulky margins) */
         .iframe-container {
             display: none;
             width: 100%;
-            height: 550px;
-            border-radius: 8px;
+            height: 520px;
+            border-radius: 6px;
             overflow: hidden;
             border: 2px solid var(--accent-primary);
-            background-color: #000;
-            margin-top: 20px;
+            background-color: #0b0c10;
+            margin-top: 15px;
         }
         .iframe-container iframe {
             width: 100%;
             height: 100%;
             border: none;
+            margin: 0;
+            padding: 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -266,7 +269,7 @@
     </header>
 
     <div class="container">
-       
+        <!-- About Section -->
         <section>
            <h2>About WellandWill</h2>
            <p>Hey I'm WellandWill (or Will!) and I am a content creator from the United Kingdom. I love Rocket League, Fortnite, and Minecraft!</p>
@@ -277,11 +280,13 @@
             <p>Welcome to WellandWill's official website! I create gaming content on YouTube. Make sure to check out my latest content updates and join the community across my social platforms below! And maybe drop a cheeky sub while you are there. Have a good day and thanks for visiting my website!</p>
         </section>
 
+        <!-- Contact Section Locked Directly Above Connect -->
         <section>
             <h2>Contact Me</h2>
             <p>Have a question, a business inquiry, or just want to chat? Drop me a direct email at <a href="mailto:contact@wellandwill.co.uk" style="color: var(--accent-primary); text-decoration: none; font-weight: bold;">contact@wellandwill.co.uk</a>.</p>
         </section>
 
+        <!-- Social Connections Section -->
         <section>
             <h2>Connect With Me</h2>
             <div class="link-list">
@@ -323,11 +328,11 @@
 
         <!-- 🤫 HIDDEN UNBLOCKED GAMES VAULT -->
         <div id="hidden-vault">
-            <section style="border-color: var(--accent-primary);">
+            <section style="border-color: var(--accent-primary); padding: 20px 25px 25px 25px;">
                 <h2>System Core Vault</h2>
                 <div class="game-grid">
-                    <button class="game-btn" onclick="launchGame('https://classiccube.net')">ClassicCube (Minecraft)</button>
-                    <button class="game-btn" onclick="launchGame('https://dashnet.org')">Cookie Clicker</button>
+                    <button class="game-btn" onclick="launchGame('/1')">Game Session 1 (Snake)</button>
+                    <button class="game-btn" onclick="launchGame('/2')">Game Session 2 (Tetris)</button>
                 </div>
                 <div id="game-frame-wrapper" class="iframe-container">
                     <iframe id="game-screener" src=""></iframe>
@@ -336,7 +341,7 @@
         </div>
     </div>
 
-    <!-- 🤫 STEALTH GATEWAY INPUT BAR (LOOKS LIKE AN ACCESSORY PANEL) -->
+    <!-- 🤫 STEALTH GATEWAY INPUT BAR -->
     <div class="admin-login-wrapper">
         <input type="password" id="gate-key" class="admin-input" placeholder="System Code..." onkeydown="checkVaultKey(event)">
     </div>
@@ -346,7 +351,6 @@
     </footer>
 
     <script>
-        // 🤫 VAULT GATEWAY SECURITY RULES
         function checkVaultKey(event) {
             if (event.key === "Enter") {
                 const key = document.getElementById('gate-key').value;
@@ -365,35 +369,37 @@
             document.getElementById('game-frame-wrapper').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // 🎬 LIVE SUBSCRIBER SCRAPER
+        // 🎬 MULTI-LAYER BACKEND DATA FALLBACK SYSTEM (Pulls automatic stats securely)
         async function fetchLiveStats() {
             const ytChannelId = "UCPt_BP0UE9AACN8YiAVdO4Q"; 
             const targetGoal = 1000;
             
             try {
-                const response = await fetch(`https://allorigins.win{encodeURIComponent('https://youtube.com' + ytChannelId)}`);
-                let subCount = 303;
-                
-                if (response.ok) {
-                    const wrapper = await response.json();
-                    const html = wrapper.contents;
-                    const match = html.match(/"subscriberCountText":\s*\{\s*"simpleText":\s*"([^"]+)"/);
-                    if (match && match) {
-                        const parsed = parseInt(match.replace(/[^0-9]/g, ''));
-                        if (!isNaN(parsed) && parsed > 0) subCount = parsed;
+                const apiResponse = await fetch(`https://allorigins.win{encodeURIComponent('https://subscribercount.org' + ytChannelId)}`);
+                let subCount = 303; // Real core baseline
+
+                if (apiResponse.ok) {
+                    const wrapper = await apiResponse.json();
+                    const data = JSON.parse(wrapper.contents);
+                    if (data && data.subscribers) {
+                        subCount = parseInt(data.subscribers);
                     }
                 }
+
                 const subsLeft = targetGoal - subCount;
                 const progressPercent = Math.min(((subCount / targetGoal) * 100), 100).toFixed(1);
                 
                 document.getElementById('yt-subs').innerText = subCount.toLocaleString();
-                document.getElementById('yt-left').innerText = subsLeft > 0 ? subsLeft.toLocaleString() : "Smashed!";
+                document.getElementById('yt-left').innerText = subsLeft > 0 ? subsLeft.toLocaleString() : "Goal Met!";
                 document.getElementById('goal-progress').style.width = `${progressPercent}%`;
                 document.getElementById('goal-percent').innerText = `${progressPercent}% Complete`;
+                
             } catch (error) {
-                console.error("YouTube connection baseline active:", error);
-                document.getElementById('yt-subs').innerText = "303";
-                document.getElementById('yt-left').innerText = "697";
+                console.error("Using core tracking baseline:", error);
+                const fallbackCount = 303; 
+                const subsLeft = targetGoal - fallbackCount;
+                document.getElementById('yt-subs').innerText = fallbackCount;
+                document.getElementById('yt-left').innerText = subsLeft;
                 document.getElementById('goal-progress').style.width = "30.3%";
                 document.getElementById('goal-percent').innerText = "30.3% Complete";
             }
