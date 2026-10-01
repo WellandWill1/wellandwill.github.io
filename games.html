@@ -15,10 +15,9 @@
         }
         html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dim); font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
         
-        /* OVERALL DUAL PANEL GRID VIEW */
         .arcade-layout { display: flex; height: 100vh; width: 100vw; position: relative; }
         
-        /* 📂 COMPACT NAVIGATION TREE SIDEBAR */
+        /* 📂 SIDEBAR MIGRATION PANELS */
         .game-sidebar { width: 260px; background-color: #06070a; border-right: 2px solid var(--accent-gold); display: flex; flex-direction: column; flex-shrink: 0; z-index: 10; transition: transform 0.3s ease; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255, 201, 60, 0.15); text-align: center; }
         .sidebar-header h1 { margin: 0; font-size: 1.3rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; }
@@ -28,51 +27,43 @@
         .game-item-btn:hover { background: rgba(255, 201, 60, 0.05); color: var(--accent-gold); }
         .game-item-btn.active { background: rgba(255, 201, 60, 0.12); color: var(--text-light); border-left-color: var(--accent-gold); }
         
-        /* 🕹️ FULLSCREEN EMBED TARGET AREA */
+        /* 🕹️ FULLSCREEN LAYER CANVAS FRAME AREA */
         .stage-area { flex: 1; background: #000; position: relative; height: 100%; }
         .sandbox-frame { width: 100%; height: 100%; border: none; display: block; background: #000; }
         
-        /* 🤫 SYSTEM PANIC LABELS */
+        /* 🤫 SYSTEM STEALTH LABELS */
         .stealth-overlay-tag { position: absolute; bottom: 15px; right: 25px; z-index: 999; background: rgba(0,0,0,0.7); padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; color: rgba(255,255,255,0.3); pointer-events: none; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.05); }
         
-        /* Menu Hide/Show for Ultra Fullscreen Action */
         .sidebar-hidden .game-sidebar { transform: translateX(-260px); width: 0; overflow: hidden; border: none; }
     </style>
 </head>
 <body>
 
     <div class="arcade-layout" id="main-layout-container">
-        <!-- Catalog Navigation Tree -->
+        <!-- Sidebar Navigation -->
         <div class="game-sidebar">
             <div class="sidebar-header">
                 <h1>Arcade Engine</h1>
             </div>
             <input type="text" id="search-bar" class="search-box" placeholder="Filter games list..." oninput="filterCatalog()">
             <div class="game-menu-list" id="catalog-container">
-                <!-- Sync links dynamically inject here -->
+                <!-- Links inject here -->
             </div>
         </div>
         
-        <!-- Live Window Container -->
+        <!-- Live Game Container Frame -->
         <div class="stage-area">
-            <!-- The game loads locally within this sandboxed wrapper, keeping the address tab locked to your site -->
-            <iframe id="arcade-frame" class="sandbox-frame" src="about:blank" allow="autoplay; gamepad; fullscreen; keyboard" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <iframe id="arcade-frame" class="sandbox-frame" src="about:blank" allow="autoplay; gamepad; fullscreen; keyboard"></iframe>
             <div class="stealth-overlay-tag">Press [Q] to Panic Hide // Press [H] to hide sidebar menu</div>
         </div>
     </div>
 
     <script>
-        // High-performance legal CDN mirror links that permit safe frame injection pipelines
+        // 🚀 WIRED DIRECTLY TO YOUR SECURE INTERNAL REPOSITORY PAGES
         const gameLibrary = [
-            { name: "Retro Bowl", url: "https://canonical.games" },
-            { name: "Slope 3D", url: "https://github.io" },
-            { name: "Drive Mad", url: "https://codesandbox.io" },
-            { name: "Tunnel Rush", url: "https://googleusercontent.com" },
-            { name: "Geometry Dash", url: "https://codesandbox.io" },
-            { name: "Run 3 Arena", url: "https://exec.run" },
-            { name: "Basket Random", url: "https://github.io" },
-            { name: "Soccer Random", url: "https://github.io" },
-            { name: "Rooftop Snipers", url: "https://github.io" }
+            { name: "Retro Bowl", url: "/retro" },
+            { name: "Slope 3D", url: "/slope" },
+            { name: "Drive Mad", url: "/drive" }
         ];
 
         function loadLibraryUI() {
@@ -85,21 +76,17 @@
                 btn.onclick = () => injectGameSandbox(index, btn);
                 container.appendChild(btn);
             });
-            // Auto-load index zero baseline target on boot
             if (gameLibrary.length > 0) {
                 injectGameSandbox(0, container.firstChild);
             }
         }
 
-        // 🚀 THE MATRIX SANDBOX BLOB INJECTION SYSTEM
         function injectGameSandbox(idx, element) {
             document.querySelectorAll('.game-item-btn').forEach(b => b.classList.remove('active'));
             element.classList.add('active');
             
             const targetUrl = gameLibrary[idx].url;
             const iframe = document.getElementById('arcade-frame');
-            
-            // Re-route target clean through the network container to keep the parent site URL fully intact
             iframe.src = targetUrl;
         }
 
@@ -116,14 +103,11 @@
             }
         }
 
-        // 🤫 STEALTH CORE CONTROLS LISTENER
         document.addEventListener('keydown', function(e) {
-            // Q Key = Immediate Panic Trigger
             if (e.key === "q" || e.key === "Q") {
                 document.getElementById('arcade-frame').src = "about:blank";
                 window.location.href = "https://google.com";
             }
-            // H Key = Hide/Show Sidebar menu for complete full-screen immersion
             if (e.key === "h" || e.key === "H") {
                 document.getElementById('main-layout-container').classList.toggle('sidebar-hidden');
             }
