@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Network Library</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-color: #1f2833;
+            --accent-gold: #ffc93c;
+            --accent-orange: #ff9a3c;
+            --text-light: #ffffff;
+            --text-dim: #c5c6c7;
+        }
+        html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dim); font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
+        .arcade-layout { display: flex; height: 100vh; width: 100vw; }
+        
+        /* 📂 SIDEBAR NAVIGATION LIST */
+        .game-sidebar { width: 260px; background-color: #06070a; border-right: 2px solid var(--accent-gold); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255, 201, 60, 0.15); text-align: center; }
+        .sidebar-header h1 { margin: 0; font-size: 1.3rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; }
+        .search-box { padding: 10px 15px; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff; font-size: 0.9rem; outline: none; }
+        .game-menu-list { flex: 1; overflow-y: auto; list-style: none; padding: 10px 0; margin: 0; }
+        .game-item-btn { width: 100%; padding: 12px 20px; background: transparent; border: none; color: var(--text-dim); text-align: left; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; border-left: 3px solid transparent; transition: all 0.2s; }
+        .game-item-btn:hover { background: rgba(255, 201, 60, 0.08); color: var(--accent-gold); }
+        .game-item-btn.active { background: rgba(255, 201, 60, 0.15); color: var(--text-light); border-left-color: var(--accent-gold); }
+        
+        /* 🕹️ MAIN FULLSCREEN CANVAS FRAME AREA */
+        .stage-area { flex: 1; display: flex; flex-direction: column; background: #000; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; display: block; background: #000; }
+        
+        /* 🤫 STEALTH EMBED PANIC TRIGGER CONTROLS */
+        .stealth-bar { position: absolute; bottom: 10px; right: 20px; z-index: 999; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; color: rgba(255,255,255,0.4); pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="arcade-layout">
+        <!-- Catalog Navigation Tree -->
+        <div class="game-sidebar">
+            <div class="sidebar-header">
+                <h1>Arcade Engine</h1>
+            </div>
+            <input type="text" id="search-bar" class="search-box" placeholder="Search game profile..." oninput="filterCatalog()">
+            <div class="game-menu-list" id="catalog-container">
+                <!-- Sync links dynamically inject here -->
+            </div>
+        </div>
+        
+        <!-- Live Window Container -->
+        <div class="stage-area">
+            <iframe id="arcade-frame" src="about:blank"></iframe>
+            <div class="stealth-bar">Press [ESC] or [Q] to panic hide environment</div>
+        </div>
+    </div>
+
+    <script>
+        // Distributed community open-source mirrors (Bypasses local school blocks completely)
+        const gameLibrary = [
+            { name: "Slope 3D Run", url: "https://github.io" },
+            { name: "Retro Bowl", url: "https://github.io" },
+            { name: "Drive Mad", url: "https://github.io" },
+            { name: "1v1.LOL", url: "https://github.io" },
+            { name: "BitLife Simulator", url: "https://github.io" },
+            { name: "Tunnel Rush", url: "https://github.io" },
+            { name: "Run 3 Arena", url: "https://github.io" },
+            { name: "Basket Random", url: "https://github.io" },
+            { name: "Soccer Random", url: "https://github.io" },
+            { name: "Getaway Shootout", url: "https://github.io" },
+            { name: "Rooftop Snipers", url: "https://github.io" },
+            { name: "Geometry Dash Local", url: "https://github.io" }
+            // More indexes match automatically down the list
+        ];
+
+        function loadLibraryUI() {
+            const container = document.getElementById('catalog-container');
+            container.innerHTML = "";
+            gameLibrary.forEach((game, index) => {
+                let btn = document.createElement('button');
+                btn.className = "game-item-btn";
+                btn.innerText = game.name;
+                btn.onclick = () => launchGame(index, btn);
+                container.appendChild(btn);
+            });
+            // Auto launch index zero baseline
+            if (gameLibrary.length > 0) {
+                launchGame(0, container.firstChild);
+            }
+        }
+
+        function launchGame(idx, element) {
+            document.querySelectorAll('.game-item-btn').forEach(b => b.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('arcade-frame').src = gameLibrary[idx].url;
+        }
+
+        function filterCatalog() {
+            let filter = document.getElementById('search-bar').value.toUpperCase();
+            let buttons = document.getElementsByClassName('game-item-btn');
+            for (let i = 0; i < buttons.length; i++) {
+                let txtValue = buttons[i].textContent || buttons[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    buttons[i].style.display = "";
+                } else {
+                    buttons[i].style.display = "none";
+                }
+            }
+        }
+
+        // 🤫 INTERNAL FRAME LOCK STEALTH PANIC TRIGGER
+        function runPanicSequence() {
+            document.getElementById('arcade-frame').src = "about:blank";
+            window.location.href = "https://classroom.google.com";
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape" || e.key === "q" || e.key === "Q") {
+                runPanicSequence();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadLibraryUI);
+    </script>
+</body>
+</html>
