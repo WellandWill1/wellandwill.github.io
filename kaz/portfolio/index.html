@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaz — Discord Server Builder & Manager</title>
+  <link rel="icon" type="image/jpeg" href="https://carrd.co" />
+  <link rel="preconnect" href="https://googleapis.com" />
+  <link rel="preconnect" href="https://gstatic.com" crossorigin />
+  <link href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-top: #0d111a;
+      --bg-bottom: #141a29;
+      --card-bg: rgba(24, 31, 48, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #5865f2;
+      --accent-glow: rgba(88, 101, 242, 0.35);
+      --badge-bg: rgba(88, 101, 242, 0.16);
+      --badge-text: #9aa4ff;
+      --text-main: #f3f5f9;
+      --text-muted: #a6b0c3;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top center, #1b243b 0%, var(--bg-top) 55%, var(--bg-bottom) 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.65;
+      padding: 56px 20px 72px;
+    }
+
+    .wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 44px 32px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .avatar {
+      width: 124px;
+      height: 124px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 28px var(--accent-glow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: 2.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 580px;
+      margin: 0 auto;
+      font-weight: 500;
+    }
+    .experience-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(88, 101, 242, 0.45);
+    }
+    .server-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 18px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .card-body { flex: 1; }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+    .role-badge {
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid rgba(88, 101, 242, 0.35);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .card-body p {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+      margin-bottom: 14px;
+    }
+
+    .card-body p:last-child { margin-bottom: 0; }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    .expect-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 34px 32px;
+      margin-top: 36px;
+      backdrop-filter: blur(12px);
+    }
+
+    .expect-card h2 {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 22px;
+    }
+
+    .expect-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .expect-list li {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .check { color: #57f287; font-weight: 800; }
+
+    @media (max-width: 600px) {
+      .card { flex-direction: column; text-align: center; }
+      .card-header { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrapper">
+    <section class="hero">
+      <img src="https://carrd.co" alt="Kaz Avatar" class="avatar" />
+      <h1>Hello</h1>
+      <p>Hey there! I'm Kaz, an experienced Discord server builder and manager with over 4 years of experience...</p>
+    </section>
+
+    <section class="experience-list">
+      <article class="card">
+        <img src="https://carrd.co" alt="Musty's Cowmunity" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>MUSTY'S COWMUNITY 42k+</h2>
+            <span class="role-badge">Moderator</span>
+          </div>
+          <p>Serving as a Moderator for Musty's Cowmunity bringing my experience to the table...</p>
+          <a href="https://youtube.com" target="_blank" rel="noopener" class="social-btn">Musty's Youtube</a>
+        </div>
+      </article>
+      <article class="card">
+        <img src="https://carrd.co" alt="Shift 110k+" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>SHIFT 110k+</h2>
+            <span class="role-badge">Moderator</span>
+          </div>
+          <p>Moderator for the Rocket League mod Shift, managing chat and user experience.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="https://carrd.co" alt="The Zebras 21k+" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>The Zebras 21k+</h2>
+            <span class="role-badge">Admin</span>
+          </div>
+          <p>Administrator for Striped's Official Discord Server ("The Zebras"), leading a full server revamp.</p>
+          <a href="https://youtube.com" target="_blank" rel="noopener" class="social-btn">Striped's Youtube</a>
+        </div>
+      </article>
+      <article class="card">
+        <img src="https://carrd.co" alt="The UFC Community 22k+" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>THE UFC COMMUNITY 22k+</h2>
+            <span class="role-badge">Admin</span>
+          </div>
+          <p>Admin for The UFC Community (22k+ members), driving growth and daily moderation.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="https://carrd.co" alt="Howard's Ducklings" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>Howard's Ducklings</h2>
+            <span class="role-badge">Server Manager</span>
+          </div>
+          <p>Server Manager for Howard, building and enhancing the server from the ground up.</p>
+          <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-btn">Howard's Tiktok</a>
+        </div>
+      </article>
+      <article class="card">
+        <img src="https://carrd.co" alt="EVMP" class="server-icon" />
+        <div class="card-body">
+          <div class="card-header">
+            <h2>EVMP</h2>
+            <span class="role-badge">Head Admin</span>
+          </div>
+          <p>Head Admin for EVMP, leveling up the server with moderation, creative visuals, and custom bots.</p>
+          <a href="https://youtube.com" target="_blank" rel="noopener" class="social-btn">Evample's Youtube</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="expect-card">
+      <h2>WHAT TO EXPECT</h2>
+      <ul class="expect-list">
+        <li><span class="check">✓</span> Fast response times</li>
+        <li><span class="check">✓</span> Clean server layouts</li>
+        <li><span class="check">✓</span> Professional moderation systems</li>
+        <li><span class="check">✓</span> Custom bot configuration</li>
+        <li><span class="check">✓</span> Long-term support</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
