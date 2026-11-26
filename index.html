@@ -329,7 +329,7 @@
         <p>&copy; 2026 WellandWill. All rights reserved.</p>
     </footer>
 
-    <script>
+        <script>
         function checkVaultKey(event) {
             if (event.key === "Enter") {
                 const key = document.getElementById('gate-key').value;
@@ -338,6 +338,10 @@
                     document.getElementById('hidden-vault').scrollIntoView({ behavior: 'smooth' });
                     document.getElementById('gate-key').value = "";
                     document.getElementById('gate-key').placeholder = "Authorized";
+                } else if (key.toLowerCase() === "kaz") {
+                    document.getElementById('gate-key').value = "";
+                    document.getElementById('gate-key').placeholder = "Redirecting...";
+                    window.location.href = "/kaz/portfolio";
                 }
             }
         }
