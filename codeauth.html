@@ -61,10 +61,27 @@
     <script>
         // 🚀 WIRED DIRECTLY TO YOUR SECURE INTERNAL REPOSITORY PAGES
         const gameLibrary = [
-            { name: "Retro Bowl", url: "/retro" },
-            { name: "Slope 3D", url: "/slope" },
-            { name: "Drive Mad", url: "/drive" }
+            { name: "Game 1", url: "1.html" },
+            { name: "Game 2", url: "2.html" },
+            { name: "Game 3", url: "3.html" },
+            { name: "Game 4", url: "4.html" }
         ];
+
+        function triggerPanic() {
+            const iframe = document.getElementById('arcade-frame');
+            if (iframe) iframe.src = "about:blank";
+            window.top.location.replace("https://google.com");
+        }
+
+        function handleHotkeys(e) {
+            if (e.key === "q" || e.key === "Q") {
+                e.preventDefault();
+                triggerPanic();
+            }
+            if (e.key === "h" || e.key === "H") {
+                document.getElementById('main-layout-container').classList.toggle('sidebar-hidden');
+            }
+        }
 
         function loadLibraryUI() {
             const container = document.getElementById('catalog-container');
@@ -88,6 +105,12 @@
             const targetUrl = gameLibrary[idx].url;
             const iframe = document.getElementById('arcade-frame');
             iframe.src = targetUrl;
+
+            iframe.onload = function() {
+                try {
+                    iframe.contentWindow.addEventListener('keydown', handleHotkeys, true);
+                } catch (err) {}
+            };
         }
 
         function filterCatalog() {
@@ -103,16 +126,7 @@
             }
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === "q" || e.key === "Q") {
-                document.getElementById('arcade-frame').src = "about:blank";
-                window.location.href = "https://google.com";
-            }
-            if (e.key === "h" || e.key === "H") {
-                document.getElementById('main-layout-container').classList.toggle('sidebar-hidden');
-            }
-        });
-
+        window.addEventListener('keydown', handleHotkeys, true);
         window.addEventListener('DOMContentLoaded', loadLibraryUI);
     </script>
 </body>
